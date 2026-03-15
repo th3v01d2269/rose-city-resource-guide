@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#1a1a1a">
+  <meta name="description" content="2,037 free community resources across all 50 states — food, shelter, health, legal aid, crisis lines, veterans, immigrants, disabilities, and more.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>US Community Resource Guide — 2,037 Free Services</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- EMERGENCY BAR -->
+  <div class="ebar">
+    <div class="ebar-i">
+      <span class="elabel">CRISIS</span>
+      <a href="tel:988" class="elink">988 Mental Health</a>
+      <span class="sep">·</span>
+      <a href="tel:741741" class="elink">Text HOME→741741</a>
+      <span class="sep">·</span>
+      <a href="tel:211" class="elink">211 Resources</a>
+      <span class="sep">·</span>
+      <a href="tel:18007997233" class="elink">DV 1-800-799-7233</a>
+      <span class="sep">·</span>
+      <a href="tel:18774243838" class="elink">Veterans 1-877-424-3838</a>
+      <span class="sep">·</span>
+      <a href="tel:18006624357" class="elink">SAMHSA 1-800-662-4357</a>
+      <span class="sep">·</span>
+      <a href="tel:911" class="elink">911 Emergency</a>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="hdr">
+    <div class="hdr-i">
+      <div class="hdr-brand">
+        <svg class="rose" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <path d="M16 4C10 4 6 8 6 13c0 7 10 15 10 15s10-8 10-15c0-5-4-9-10-9z" fill="#e8442a"/>
+          <path d="M16 10c-3 0-5 2-5 4.5C11 17.5 16 22 16 22s5-4.5 5-7.5C21 12 19 10 16 10z" fill="#c23220"/>
+          <path d="M16 4v6M13 6l3 4M19 6l-3 4" stroke="#c23220" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <div>
+          <h1 class="htitle">US Community<br><span>Resource Guide</span></h1>
+        </div>
+      </div>
+      <div class="hmeta">
+        <span class="hcount" id="hcount">2,037</span>
+        <span class="htag">All 50 States · Free Services</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- SEARCH & FILTERS -->
+  <div class="srch" role="search">
+    <div class="srch-i">
+      <div class="sbar">
+        <svg class="sico" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="2"/>
+          <path d="M13 13L17 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <input type="search" id="searchInput" class="sinput"
+          placeholder="Search name, service, keyword, city…"
+          autocomplete="off" autocorrect="off" spellcheck="false"
+          aria-label="Search resources">
+        <button class="sclear" id="searchClear" aria-label="Clear search" hidden>
+          <svg viewBox="0 0 16 16" fill="none"><path d="M4 4L12 12M12 4L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <div class="frow">
+        <div class="fg">
+          <label class="flbl" for="stateFilter">State</label>
+          <select id="stateFilter" class="fsel"><option value="">All States</option></select>
+        </div>
+        <div class="fg">
+          <label class="flbl" for="countyFilter">County / Region</label>
+          <select id="countyFilter" class="fsel" disabled><option value="">All Counties</option></select>
+        </div>
+        <div class="fg fg-cat">
+          <label class="flbl" for="categoryFilter">Category</label>
+          <select id="categoryFilter" class="fsel"><option value="">All Categories</option></select>
+        </div>
+        <button class="freset" id="filterReset">Reset</button>
+      </div>
+      <div class="rsum-wrap" id="rsumWrap" style="display:none">
+        <span class="rsum" id="resultsSummary"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- CATEGORY PILLS -->
+  <div class="pills" role="navigation" aria-label="Category quick filter">
+    <div class="pill-track" id="pillTrack"></div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <main class="main" id="mainContent">
+    <div class="grid" id="cardsGrid" role="list" aria-live="polite" aria-label="Resource listings"></div>
+    <div class="pager" id="pagination" role="navigation" aria-label="Page navigation"></div>
+    <div class="page-info" id="pageInfo" style="display:none"></div>
+    <div class="empty" id="emptyState" style="display:none">
+      <div class="eico">🔍</div>
+      <p>No resources found.<br>Try different keywords or reset filters.</p>
+    </div>
+    <div class="loading" id="loadingState"><div class="spinner"></div></div>
+  </main>
+
+  <!-- MODAL -->
+  <div id="modalOverlay" style="display:none" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal" id="modal">
+      <button class="mclose" id="modalClose" aria-label="Close">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M3 3L13 13M13 3L3 13" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="mbadge" id="modalBadge"></div>
+      <h2 class="mtitle" id="modalTitle"></h2>
+      <div class="mloc" id="modalLoc"></div>
+      <div class="macts" id="modalActions"></div>
+      <div id="modalHours"></div>
+      <div class="mbody" id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast" style="display:none"></div>
+
+  <!-- FOOTER -->
+  <footer class="foot">
+    <div class="foot-i">
+      <p><strong>US Community Resource Guide</strong> — 2,037 verified free resources across all 50 states, DC, and Puerto Rico. The most comprehensive social services directory available.</p>
+      <p class="fnote">Always call ahead — hours, eligibility, and availability change. In a crisis: call 988 (mental health), 211 (local resources), or 911 (emergency).</p>
+      <p class="fstats">2,037 resources · 25 categories · 53 jurisdictions · Updated March 2026</p>
+      <p class="foot-sources"><strong>Sources:</strong> Street Roots Rose City Resource Guide (Dec 2025–May 2026), Coalition for the Homeless NYC Street Sheet (2024), Salt Lake County 211 (2024-25), Louisville Street Tips (2025-26), Montgomery County OH Street Card (2024), Buncombe County NC Resource Sheet (2025), Sacramento County Street Sheet (2024), ShelterBridge App, Feeding America, 211.org, SAMHSA, HUD, SSA, VA, USDA, HHS, state DHS offices, and verified local nonprofits.</p>
+    </div>
+  </footer>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>
