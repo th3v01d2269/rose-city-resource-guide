@@ -117,3 +117,26 @@ app.listen(PORT, () => {
   console.log(`   ${resources.length.toLocaleString()} resources · ${META.states.length} states/territories`);
   console.log(`   http://localhost:${PORT}\n`);
 });
+
+app.use(require('express').json());
+app.post('/api/ask', async (req, res) => {
+  const { question, state } = req.body;
+  if (!question) return res.status(400).json({ error: 'No question' });
+  const apiKey = process.env.ANTHROPIC_API_KEY;
+  if (!apiKey) return res.status(500).json({ error: 'No API key set' });
+  const relevant = resources
+    .filter(r => (!state || r.state === state || r.state === 'National'))
+    .filter(r => question.toLowerCase().split(' ').some(w => w.length > 3 && (r.name + r.description + r.category).toLowerCase().includes(w)))
+    .slice(0, 15)
+    .map(r => `• ${r.name} (${r.category}) ${r.phone || ''} ${r.address || ''}`)
+    .join('\n');
+  const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
+    body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1024,
+      system: 'You are a compassionate social services navigator. Help people find free resources. Be warm, practical, include phone numbers and addresses. Lead with crisis lines (988, 211) if someone seems in danger.',
+      messages: [{ role: 'user', content: `Question: ${question}\n\nRelevant resources:\n${relevant}` }] })
+  });
+  const data = await resp.json();
+  res.json({ answer: data.content?.[0]?.text || 'Sorry, try again.' });
+});

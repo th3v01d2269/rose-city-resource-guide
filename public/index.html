@@ -139,3 +139,27 @@
   <script src="/js/app.js"></script>
 </body>
 </html>
+<button onclick="document.getElementById('cp').style.display=document.getElementById('cp').style.display==='none'?'flex':'none'" style="position:fixed;bottom:24px;right:20px;z-index:500;width:56px;height:56px;border-radius:50%;background:#e8442a;color:#fff;border:none;cursor:pointer;font-size:24px;box-shadow:0 4px 20px rgba(232,68,42,.45)">💬</button>
+<div id="cp" style="display:none;position:fixed;bottom:90px;right:16px;z-index:600;width:min(360px,calc(100vw - 32px));background:#faf8f5;border-radius:16px;box-shadow:0 8px 40px rgba(0,0,0,.22);flex-direction:column;border:1.5px solid #ddd8d2;overflow:hidden">
+<div style="background:#1a1a1a;padding:14px 16px;color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700">🌹 Resource Assistant <span style="font-size:11px;color:#888;font-weight:400;margin-left:8px">AI-powered · Free services only</span></div>
+<div id="cm" style="padding:14px;display:flex;flex-direction:column;gap:10px;max-height:400px;overflow-y:auto"><div style="background:#f2ede8;padding:9px 13px;border-radius:4px 12px 12px 12px;font-size:13.5px;border:1.5px solid #ddd8d2">Hi! Describe what you need — food, shelter, health care, legal help, anything — and I'll find the right free programs for you.</div></div>
+<div style="display:flex;gap:8px;padding:10px 12px;border-top:1.5px solid #ddd8d2;background:#fff">
+<input id="ci" type="text" placeholder="What do you need help with?" style="flex:1;border:1.5px solid #ddd8d2;border-radius:20px;padding:8px 14px;font-size:14px;outline:none" onkeydown="if(event.key==='Enter')sendQ()">
+<button onclick="sendQ()" style="width:36px;height:36px;border-radius:50%;background:#e8442a;border:none;color:#fff;cursor:pointer;font-size:16px">➤</button>
+</div></div>
+<script>
+async function sendQ(){
+  const inp=document.getElementById('ci'),cm=document.getElementById('cm'),q=inp.value.trim();
+  if(!q)return; inp.value='';
+  cm.innerHTML+=`<div style="display:flex;justify-content:flex-end"><div style="background:#e8442a;color:#fff;padding:9px 13px;border-radius:12px 4px 12px 12px;font-size:13.5px;max-width:88%">${q}</div></div>`;
+  cm.innerHTML+=`<div id="typing" style="background:#f2ede8;padding:9px 13px;border-radius:4px 12px 12px 12px;font-size:13px;color:#888;border:1.5px solid #ddd8d2">Finding resources…</div>`;
+  cm.scrollTop=cm.scrollHeight;
+  try{
+    const r=await fetch('/api/ask',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({question:q})});
+    const d=await r.json();
+    document.getElementById('typing').remove();
+    cm.innerHTML+=`<div style="background:#f2ede8;padding:9px 13px;border-radius:4px 12px 12px 12px;font-size:13.5px;white-space:pre-wrap;border:1.5px solid #ddd8d2">${d.answer||d.error}</div>`;
+  }catch(e){document.getElementById('typing').remove();cm.innerHTML+=`<div style="background:#f2ede8;padding:9px 13px;border-radius:4px 12px 12px 12px;font-size:13px;color:#888">Connection error. Try again.</div>`;}
+  cm.scrollTop=cm.scrollHeight;
+}
+</script>
