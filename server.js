@@ -133,7 +133,7 @@ app.post('/api/ask', async (req, res) => {
   const resp = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', 'x-api-key': apiKey, 'anthropic-version': '2023-06-01' },
-    body: JSON.stringify({ model: 'claude-sonnet-4-6', max_tokens: 1024,
+    body: JSON.stringify({ model: .llama3-70b-8192, max_tokens: 1000,
       system: 'You are a compassionate social services navigator. Help people find free resources. Be warm, practical, include phone numbers and addresses. Lead with crisis lines (988, 211) if someone seems in danger.',
       messages: [{ role: 'user', content: `Question: ${question}\n\nRelevant resources:\n${relevant}` }] })
   });
