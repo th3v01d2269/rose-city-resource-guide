@@ -1,7 +1,7 @@
 {
   "name": "rose-city-resource-guide",
   "version": "1.0.0",
-  "description": "Portland Metro Area Community Resource Guide \u2014 Multnomah, Washington & Clackamas Counties",
+  "description": "Portland Metro Area Community Resource Guide — Multnomah, Washington & Clackamas Counties",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
