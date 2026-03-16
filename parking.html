@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1a1a1a">
+<meta name="description" content="Find safe overnight parking near you — Walmarts, rest areas, churches, truck stops, and verified safe parking programs.">
+<title>Safe Overnight Parking Finder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --rust:#e8442a;--rust-d:#c23220;--coal:#1a1a1a;--coal-m:#2c2c2c;
+  --warm:#faf8f5;--off:#f2ede8;--bdr:#ddd8d2;--bdr-d:#c8c2ba;
+  --txt:#1a1a1a;--txt-m:#6b6560;--stone:#6b6560;
+  --green:#1b5e20;--green-l:#e8f5e9;--blue:#0277bd;--blue-l:#e3f2fd;
+  --fd:'Barlow Condensed',sans-serif;--fb:'Barlow',sans-serif;--mw:900px
+}
+html{font-size:16px;-webkit-text-size-adjust:100%}
+body{font-family:var(--fb);background:var(--warm);color:var(--txt);line-height:1.5;min-height:100vh}
+
+.ebar{background:var(--coal);padding:6px 14px;font-family:var(--fd);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;display:flex;align-items:center;flex-wrap:wrap;gap:3px 8px}
+.elabel{color:var(--rust);font-weight:800}
+.elink{color:#e8e4de;text-decoration:none;padding:2px 5px;border-radius:2px;white-space:nowrap}
+.elink:hover{background:var(--rust);color:#fff}
+.sep{color:#444}
+
+.hdr{background:var(--coal);border-bottom:3px solid var(--rust);padding:14px 16px}
+.hdr-i{max-width:var(--mw);margin:0 auto;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px}
+.back-link{color:#aaa;text-decoration:none;font-family:var(--fd);font-size:13px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;gap:5px;transition:color .15s}
+.back-link:hover{color:#fff}
+.htitle{font-family:var(--fd);font-size:clamp(18px,4vw,24px);font-weight:800;color:#fff;text-transform:uppercase;line-height:1.1}
+.htitle span{color:var(--rust)}
+.hbadge{background:#1b5e20;color:#fff;font-family:var(--fd);font-size:11px;font-weight:700;padding:3px 10px;border-radius:10px;text-transform:uppercase;letter-spacing:.05em}
+
+.hero{background:linear-gradient(135deg,var(--coal-m) 0%,#2a1a0e 100%);padding:28px 16px;text-align:center;border-bottom:2px solid #333}
+.hero-i{max-width:var(--mw);margin:0 auto}
+.hero h2{font-family:var(--fd);font-size:clamp(22px,5vw,32px);font-weight:800;color:#fff;margin-bottom:8px}
+.hero p{color:#aaa;font-size:14px;max-width:500px;margin:0 auto 20px}
+.locate-btn{background:var(--rust);color:#fff;border:none;font-family:var(--fd);font-size:16px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:14px 32px;border-radius:8px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all .15s;box-shadow:0 4px 16px rgba(232,68,42,.3)}
+.locate-btn:hover{background:var(--rust-d);transform:translateY(-1px)}
+.locate-btn:disabled{background:#555;cursor:default;transform:none;box-shadow:none}
+.locate-btn svg{width:18px;height:18px}
+
+.status-bar{max-width:var(--mw);margin:12px auto 0;padding:0 16px;font-size:13px;color:#888;font-family:var(--fd);text-align:center;min-height:20px}
+
+.main{max-width:var(--mw);margin:0 auto;padding:16px}
+
+/* ── LEGAL PROGRAMS ── */
+.section-title{font-family:var(--fd);font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--coal);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.section-title svg{width:18px;height:18px;color:var(--rust)}
+
+.programs-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:10px;margin-bottom:28px}
+.program-card{background:#fff;border:1.5px solid var(--bdr);border-radius:8px;padding:14px;display:flex;gap:12px;align-items:flex-start;transition:border-color .15s,box-shadow .15s}
+.program-card:hover{border-color:var(--green);box-shadow:0 3px 12px rgba(0,0,0,.1)}
+.prog-icon{font-size:24px;flex-shrink:0;width:36px;text-align:center}
+.prog-info{}
+.prog-name{font-family:var(--fd);font-size:15px;font-weight:700;color:var(--coal)}
+.prog-type{font-family:var(--fd);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--stone);margin-bottom:4px}
+.prog-policy{font-size:12px;color:var(--txt-m);line-height:1.45}
+
+/* ── MAP / RESULTS ── */
+.results-header{font-family:var(--fd);font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:.05em;color:var(--stone);margin-bottom:10px}
+.results-grid{display:flex;flex-direction:column;gap:8px;margin-bottom:24px}
+
+.result-card{background:#fff;border:1.5px solid var(--bdr);border-radius:8px;padding:14px;display:flex;align-items:flex-start;gap:12px;transition:border-color .15s}
+.result-card.verified{border-left:3px solid var(--green)}
+.result-card.caution{border-left:3px solid #f57f17}
+.result-icon{font-size:22px;flex-shrink:0;width:30px;text-align:center;margin-top:2px}
+.result-main{flex:1;min-width:0}
+.result-name{font-family:var(--fd);font-size:15px;font-weight:700;color:var(--coal)}
+.result-addr{font-size:12px;color:var(--txt-m);margin:2px 0}
+.result-dist{font-family:var(--fd);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--stone)}
+.result-policy{font-size:12px;color:var(--green);background:var(--green-l);padding:4px 8px;border-radius:4px;margin-top:6px;line-height:1.4}
+.result-actions{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.result-btn{font-family:var(--fd);font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:5px 12px;border-radius:4px;text-decoration:none;border:none;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:4px}
+.result-btn-p{background:var(--rust);color:#fff}
+.result-btn-p:hover{background:var(--rust-d)}
+.result-btn-s{background:var(--off);border:1.5px solid var(--bdr-d);color:var(--coal)}
+.result-btn-s:hover{border-color:var(--rust);color:var(--rust)}
+.result-tag{font-family:var(--fd);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 7px;border-radius:9px}
+.tag-verified{background:var(--green-l);color:var(--green)}
+.tag-caution{background:#fff8e1;color:#e65100}
+
+/* ── TIPS BOX ── */
+.tips-box{background:var(--blue-l);border:1.5px solid #90caf9;border-radius:8px;padding:16px;margin-bottom:24px}
+.tips-title{font-family:var(--fd);font-size:14px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;color:var(--blue);margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.tips-list{list-style:none;display:flex;flex-direction:column;gap:6px}
+.tips-list li{font-size:13px;color:#1a3a5c;line-height:1.45;padding-left:16px;position:relative}
+.tips-list li::before{content:'→';position:absolute;left:0;color:var(--blue);font-size:11px;top:2px}
+
+/* ── SAFE PARKING PROGRAMS ── */
+.sprograms{margin-bottom:28px}
+.sprogram-card{background:#fff;border:1.5px solid var(--bdr);border-left:3px solid var(--green);border-radius:8px;padding:14px;margin-bottom:8px}
+.sp-header{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px}
+.sp-name{font-family:var(--fd);font-size:15px;font-weight:700;color:var(--coal)}
+.sp-loc{font-family:var(--fd);font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--stone)}
+.sp-desc{font-size:13px;color:var(--txt-m);line-height:1.45;margin-bottom:8px}
+.sp-contact{font-size:13px;font-weight:600;color:var(--rust)}
+.sp-contact a{color:var(--rust);text-decoration:none}
+
+/* ── LOADING ── */
+.loading{text-align:center;padding:40px 16px;color:var(--stone)}
+.spinner{width:32px;height:32px;border:3px solid var(--bdr);border-top-color:var(--rust);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 12px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── TABS ── */
+.tabs{display:flex;gap:2px;background:#eee;border-radius:8px;padding:3px;margin-bottom:20px}
+.tab{flex:1;font-family:var(--fd);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:8px 12px;border:none;background:transparent;color:var(--stone);cursor:pointer;border-radius:6px;transition:all .15s;text-align:center}
+.tab.active{background:#fff;color:var(--coal);box-shadow:0 1px 4px rgba(0,0,0,.1)}
+
+.tab-content{display:none}
+.tab-content.active{display:block}
+
+@media(max-width:480px){.programs-grid{grid-template-columns:1fr}}
+:focus-visible{outline:2px solid var(--rust);outline-offset:2px}
+</style>
+</head>
+<body>
+
+<div class="ebar">
+  <span class="elabel">CRISIS</span>
+  <a href="tel:988" class="elink">988</a><span class="sep">·</span>
+  <a href="tel:211" class="elink">211 Resources</a><span class="sep">·</span>
+  <a href="tel:18007997233" class="elink">DV 1-800-799-7233</a><span class="sep">·</span>
+  <a href="tel:911" class="elink">911 Emergency</a>
+</div>
+
+<header class="hdr">
+  <div class="hdr-i">
+    <a href="/" class="back-link">
+      <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back to Resources
+    </a>
+    <div>
+      <h1 class="htitle">🚗 Safe Overnight<br><span>Parking Finder</span></h1>
+    </div>
+    <span class="hbadge">✓ Vehicle Dwelling</span>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="hero-i">
+    <h2>Find Safe Places to Sleep Tonight</h2>
+    <p>Locate nearby Walmarts, rest areas, truck stops, churches, and verified safe parking programs for people living in their vehicles.</p>
+    <button class="locate-btn" id="locateBtn" onclick="findParking()">
+      <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" fill="currentColor"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="12" r="8" stroke="currentColor" stroke-width="2"/></svg>
+      Find Parking Near Me
+    </button>
+    <div class="status-bar" id="statusBar"></div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('nearby')">📍 Near Me</button>
+    <button class="tab" onclick="switchTab('programs')">✅ Safe Programs</button>
+    <button class="tab" onclick="switchTab('tips')">💡 Safety Tips</button>
+  </div>
+
+  <!-- TAB: NEARBY -->
+  <div class="tab-content active" id="tab-nearby">
+    <div id="resultsSection" style="display:none">
+      <div class="results-header" id="resultsHeader"></div>
+      <div class="results-grid" id="resultsGrid"></div>
+    </div>
+
+    <div id="networksSection">
+      <div class="section-title">
+        <svg viewBox="0 0 20 20" fill="none"><path d="M10 2a8 8 0 100 16A8 8 0 0010 2z" stroke="currentColor" stroke-width="1.5"/><path d="M10 6v4l3 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Generally Overnight-Friendly Spots
+      </div>
+      <div class="programs-grid" id="networksGrid"></div>
+      <div style="background:#fff8e1;border:1.5px solid #f9a825;border-radius:8px;padding:12px;margin-top:4px;font-size:13px;color:#5d4037">
+        ⚠️ <strong>Always ask permission first.</strong> Policies vary by location. "Generally allows" is not a guarantee. Be respectful, leave no trace, and move on if asked.
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: SAFE PROGRAMS -->
+  <div class="tab-content" id="tab-programs">
+    <div class="sprograms">
+      <div class="section-title">
+        <svg viewBox="0 0 20 20" fill="none"><path d="M9 12l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 5h14M3 10h14M3 15h8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Verified Safe Parking Programs
+      </div>
+      <p style="font-size:13px;color:var(--stone);margin-bottom:16px">These organizations specifically run or coordinate safe overnight parking for people living in vehicles. Free, non-judgmental, often with case management.</p>
+      <div id="safeParkingList"></div>
+    </div>
+  </div>
+
+  <!-- TAB: TIPS -->
+  <div class="tab-content" id="tab-tips">
+    <div class="tips-box" style="margin-bottom:16px">
+      <div class="tips-title">
+        <svg viewBox="0 0 20 20" fill="none" width="16" height="16"><path d="M10 2a8 8 0 100 16A8 8 0 0010 2z" stroke="currentColor" stroke-width="1.5"/><path d="M10 9v5M10 7h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Before You Park
+      </div>
+      <ul class="tips-list">
+        <li>Always ask permission before overnight parking at private lots</li>
+        <li>Park in well-lit areas near other vehicles when possible</li>
+        <li>Know your local laws — some cities have vehicle habitation bans</li>
+        <li>Have a backup location in mind in case you're asked to leave</li>
+        <li>Keep your registration and ID accessible</li>
+        <li>Call 211 — they often know local safe parking programs not listed online</li>
+      </ul>
+    </div>
+    <div class="tips-box" style="background:#fdf0ee;border-color:#ffab91;margin-bottom:16px">
+      <div class="tips-title" style="color:#bf360c">
+        <svg viewBox="0 0 20 20" fill="none" width="16" height="16"><path d="M10 3l7 14H3z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><path d="M10 9v4M10 14.5h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        Safety While Sleeping
+      </div>
+      <ul class="tips-list" style="--blue:#bf360c">
+        <li>Use window covers for privacy — they also help with temperature regulation</li>
+        <li>Keep a phone charged. 911 works even without cell service</li>
+        <li>Don't run your engine for heat — carbon monoxide risk. Use blankets or a safe space heater</li>
+        <li>Keep doors locked and trust your instincts — move if something feels wrong</li>
+        <li>Keep a personal safety kit: water, food, flashlight, first aid, important documents</li>
+      </ul>
+    </div>
+    <div class="tips-box" style="background:var(--green-l);border-color:#a5d6a7">
+      <div class="tips-title" style="color:var(--green)">
+        <svg viewBox="0 0 20 20" fill="none" width="16" height="16"><path d="M10 2a8 8 0 100 16A8 8 0 0010 2z" stroke="currentColor" stroke-width="1.5"/><path d="M7 10l2 2 4-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Your Rights
+      </div>
+      <ul class="tips-list" style="--blue:var(--green)">
+        <li>Police cannot search your vehicle without consent or a warrant (generally)</li>
+        <li>You do not have to tell officers where you live or what you're doing</li>
+        <li>Many cities have safe parking ordinances protecting vehicle dwellers</li>
+        <li>If harassed, document badge numbers and contact local legal aid</li>
+        <li>National Homelessness Law Center: nlchp.org — free legal resources</li>
+      </ul>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ── Known safe parking programs ────────────────────────────────────────
+const SAFE_PROGRAMS = [
+  { name: 'Safe Parking LA', location: 'Los Angeles, CA', desc: 'Network of 30+ church parking lots open 8pm–7am. Case management, restrooms, security. Free for people living in vehicles.', contact: '213-382-6200', website: 'safeparkingla.org', state: 'CA' },
+  { name: 'Safe Parking Program – San Diego', location: 'San Diego, CA', desc: 'City-funded safe parking at multiple locations. Case management to move toward housing. Free.', contact: '211', website: 'sdhc.org/safe-parking', state: 'CA' },
+  { name: 'LifeMoves Safe Parking – Silicon Valley', location: 'San Jose, CA', desc: 'Safe overnight parking with showers, restrooms, case management at church sites.', contact: '408-539-2145', website: 'lifemoves.org', state: 'CA' },
+  { name: 'City of Eugene Safe Parking Program', location: 'Eugene, OR', desc: 'City-managed safe parking sites with security and service connections.', contact: '541-682-5010', website: 'eugene-or.gov', state: 'OR' },
+  { name: 'Home Plate – Portland OR', location: 'Portland, OR', desc: 'Safe parking coordination for vehicle dwellers in Portland metro. Connects to services.', contact: '503-265-8818', website: '', state: 'OR' },
+  { name: 'Safe Parking Hawaii', location: 'Oahu, HI', desc: 'Church-based safe parking program on Oahu. Overnight parking with case management.', contact: '808-791-9400', website: '', state: 'HI' },
+  { name: 'UPLIFT Safe Parking – Santa Barbara', location: 'Santa Barbara, CA', desc: 'Safe overnight parking at church lots. Security patrols, restroom access, social services.', contact: '805-284-0612', website: 'upliftSB.org', state: 'CA' },
+  { name: 'Fresno Safe Parking Program', location: 'Fresno, CA', desc: 'City-supported safe overnight parking program. Free, case management available.', contact: '559-621-8300', website: '', state: 'CA' },
+  { name: 'Safe Parking Program – Ventura County', location: 'Ventura, CA', desc: 'Faith-based safe parking network in Ventura County. Free overnight parking with services.', contact: '805-652-7567', website: '', state: 'CA' },
+  { name: 'Vehicle Dweller Services – King County', location: 'Seattle, WA', desc: 'King County services for people living in vehicles. Safe parking referrals via 211.', contact: '211', website: 'kingcounty.gov', state: 'WA' },
+  { name: 'Safe Parking Initiative – Denver', location: 'Denver, CO', desc: 'Denver urban safe parking sites with overnight security and case management.', contact: '720-944-3666', website: '', state: 'CO' },
+  { name: 'Grace at Work – Tucson', location: 'Tucson, AZ', desc: 'Church parking lots open overnight for vehicle dwellers with social service connections.', contact: '520-292-9900', website: '', state: 'AZ' },
+  { name: 'Sarasota Safe Parking Program', location: 'Sarasota, FL', desc: 'First safe parking program in Florida. Church-based overnight parking with case management.', contact: '941-356-6045', website: '', state: 'FL' },
+  { name: 'A New Leaf – Phoenix Safe Parking', location: 'Phoenix, AZ', desc: 'Church-based safe overnight parking program. Free with case management and restroom access.', contact: '480-969-4024', website: 'turnanewleaf.org', state: 'AZ' },
+  { name: 'National Homelessness Law Center – Vehicle Dwelling', location: 'National', desc: 'Know your rights as a vehicle dweller. State-by-state legal guides, advocacy resources.', contact: '', website: 'nlchp.org/vehicle-residency', state: 'National' },
+  { name: 'Safe Parking Map – Vehicle Dwelling Resources', location: 'National', desc: 'Comprehensive online map of safe parking programs, free camping, and overnight options nationwide at freecampsites.net and campendium.com.', contact: '', website: 'freecampsites.net', state: 'National' },
+];
+
+// ── Parking network types ──────────────────────────────────────────────
+const NETWORKS = [
+  { icon:'🛒', name:'Walmart Supercenter', policy:'Many (not all) allow overnight. Always ask the store manager. 24-hour locations best.', color:'#1b5e20' },
+  { icon:'🏕️', name:'Cracker Barrel', policy:'Officially RV/vehicle friendly at most locations. Ask manager.', color:'#1b5e20' },
+  { icon:'😴', name:'Rest Area / Travel Plaza', policy:'Legal overnight parking. Usually 8-10 hour limit. Free, patrolled.', color:'#1b5e20' },
+  { icon:'🚛', name:'Truck Stop (Pilot / Flying J)', policy:'24/7, overnight parking areas. Showers available for purchase.', color:'#1b5e20' },
+  { icon:'⛪', name:'Church Parking Lot', policy:'Many churches run or allow safe parking programs. Call ahead.', color:'#1b5e20' },
+  { icon:'🎰', name:'Tribal Casino', policy:'Most tribal casinos allow free overnight. Large, lit lots.', color:'#1b5e20' },
+  { icon:'🏕️', name:"Cabela's / Bass Pro", policy:'Most locations welcome overnight parking. Ask staff.', color:'#1b5e20' },
+  { icon:'🌲', name:'National Forest / BLM Land', policy:'Free dispersed camping usually allowed 14 days. No hookups. freecampsites.net for maps.', color:'#1b5e20' },
+  { icon:'🏥', name:'Hospital Parking Lot', policy:'Some allow overnight — ask security. Safe, well-lit.', color:'#f57f17' },
+  { icon:'🛑', name:'Street Parking', policy:'Legal in most cities unless signs prohibit. Know local vehicle habitation laws.', color:'#f57f17' },
+];
+
+function init() {
+  // Render network cards
+  const grid = document.getElementById('networksGrid');
+  NETWORKS.forEach(n => {
+    grid.innerHTML += `
+      <div class="program-card">
+        <div class="prog-icon">${n.icon}</div>
+        <div class="prog-info">
+          <div class="prog-name">${n.name}</div>
+          <div class="prog-policy">${n.policy}</div>
+        </div>
+      </div>`;
+  });
+
+  // Render safe programs
+  const list = document.getElementById('safeParkingList');
+  SAFE_PROGRAMS.forEach(p => {
+    list.innerHTML += `
+      <div class="sprogram-card">
+        <div class="sp-header">
+          <div>
+            <div class="sp-name">${p.name}</div>
+            <div class="sp-loc">📍 ${p.location}</div>
+          </div>
+          <span class="result-tag tag-verified">✓ Verified</span>
+        </div>
+        <div class="sp-desc">${p.desc}</div>
+        <div class="sp-contact" style="display:flex;gap:8px;flex-wrap:wrap">
+          ${p.contact ? `<a href="tel:${p.contact.replace(/[^\d]/g,'')}" class="result-btn result-btn-p" style="font-size:12px;padding:5px 12px">📞 ${p.contact}</a>` : ''}
+          ${p.website ? `<a href="https://${p.website}" target="_blank" rel="noopener" class="result-btn result-btn-s" style="font-size:12px;padding:5px 12px">🌐 Website</a>` : ''}
+        </div>
+      </div>`;
+  });
+}
+
+function switchTab(id) {
+  document.querySelectorAll('.tab').forEach((t,i) => {
+    const ids = ['nearby','programs','tips'];
+    t.classList.toggle('active', ids[i] === id);
+  });
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+}
+
+async function findParking() {
+  const btn = document.getElementById('locateBtn');
+  const status = document.getElementById('statusBar');
+  btn.disabled = true;
+  btn.textContent = '📍 Locating...';
+  status.textContent = 'Getting your location...';
+
+  if (!navigator.geolocation) {
+    status.textContent = '⚠️ Geolocation not supported. Search manually using the address bar.';
+    btn.disabled = false; btn.innerHTML = 'Try Again';
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      const { latitude: lat, longitude: lng } = pos.coords;
+      status.textContent = `📍 Location found (${lat.toFixed(3)}, ${lng.toFixed(3)}) — searching nearby...`;
+      await searchNearby(lat, lng);
+      btn.disabled = false;
+      btn.textContent = '🔄 Search Again';
+    },
+    (err) => {
+      status.textContent = '⚠️ Could not get location. Enable location access and try again.';
+      btn.disabled = false;
+      btn.textContent = 'Try Again';
+    },
+    { timeout: 10000, maximumAge: 60000 }
+  );
+}
+
+async function searchNearby(lat, lng) {
+  const status = document.getElementById('statusBar');
+  const section = document.getElementById('resultsSection');
+  const grid = document.getElementById('resultsGrid');
+  const header = document.getElementById('resultsHeader');
+
+  grid.innerHTML = '<div class="loading"><div class="spinner"></div><div>Searching nearby...</div></div>';
+  section.style.display = 'block';
+
+  // Queries to search for (we use Google Maps URLs since we can't call Places API without a key)
+  const searches = [
+    { label: 'Walmart 24hr', icon: '🛒', q: 'Walmart Supercenter', policy: 'Ask manager for overnight permission', tag: 'caution' },
+    { label: 'Rest Area', icon: '😴', q: 'rest area', policy: 'Legal overnight — usually free, 8-10 hr limit', tag: 'verified' },
+    { label: 'Truck Stop', icon: '🚛', q: 'truck stop', policy: '24/7, overnight parking areas available', tag: 'verified' },
+    { label: 'Cracker Barrel', icon: '🏠', q: 'Cracker Barrel restaurant', policy: 'Officially overnight-friendly — ask manager', tag: 'verified' },
+    { label: 'Church', icon: '⛪', q: 'church', policy: 'Many have safe parking programs — call ahead', tag: 'caution' },
+    { label: 'Casino', icon: '🎰', q: 'casino', policy: 'Tribal casinos often allow free overnight', tag: 'verified' },
+    { label: 'Cabela\'s / Bass Pro', icon: '🏕️', q: "Cabela's Bass Pro", policy: 'Most locations overnight-friendly', tag: 'verified' },
+    { label: 'Hospital', icon: '🏥', q: 'hospital', policy: 'Ask security — often safe, well-lit', tag: 'caution' },
+  ];
+
+  grid.innerHTML = '';
+  header.textContent = `Nearby overnight parking options — tap "Directions" to navigate`;
+
+  // Since we don't have a Places API key, generate Google Maps search links
+  // that will open with the user's actual location
+  const results = searches.map(s => ({
+    ...s,
+    mapsUrl: `https://www.google.com/maps/search/${encodeURIComponent(s.q)}/@${lat},${lng},13z`,
+    dirUrl: `https://www.google.com/maps/search/${encodeURIComponent(s.q + ' near me')}/@${lat},${lng},13z`
+  }));
+
+  results.forEach(r => {
+    grid.innerHTML += `
+      <div class="result-card ${r.tag}">
+        <div class="result-icon">${r.icon}</div>
+        <div class="result-main">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:4px">
+            <div class="result-name">${r.label}</div>
+            <span class="result-tag ${r.tag === 'verified' ? 'tag-verified' : 'tag-caution'}">${r.tag === 'verified' ? '✓ Friendly' : '⚠ Ask First'}</span>
+          </div>
+          <div class="result-policy">${r.policy}</div>
+          <div class="result-actions">
+            <a href="${r.mapsUrl}" target="_blank" rel="noopener" class="result-btn result-btn-p">
+              🗺️ Find Nearby
+            </a>
+            <a href="${r.dirUrl}" target="_blank" rel="noopener" class="result-btn result-btn-s">
+              📍 Get Directions
+            </a>
+          </div>
+        </div>
+      </div>`;
+  });
+
+  // Also show local safe parking program if found
+  const userState = await guessState(lat, lng);
+  const localPrograms = SAFE_PROGRAMS.filter(p => p.state === userState);
+  if (localPrograms.length) {
+    grid.innerHTML += `<div style="font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#1b5e20;margin-top:8px;padding:8px 0 4px">✅ Verified Safe Parking Programs Near You</div>`;
+    localPrograms.forEach(p => {
+      grid.innerHTML += `
+        <div class="result-card verified">
+          <div class="result-icon">🏛️</div>
+          <div class="result-main">
+            <div class="result-name">${p.name}</div>
+            <div class="result-addr">${p.location}</div>
+            <div class="result-policy">${p.desc}</div>
+            <div class="result-actions">
+              ${p.contact ? `<a href="tel:${p.contact.replace(/[^\d]/g,'')}" class="result-btn result-btn-p">📞 ${p.contact}</a>` : ''}
+              ${p.website ? `<a href="https://${p.website}" target="_blank" class="result-btn result-btn-s">🌐 Website</a>` : ''}
+            </div>
+          </div>
+        </div>`;
+    });
+  }
+
+  status.textContent = `✓ Showing overnight parking options near ${lat.toFixed(3)}, ${lng.toFixed(3)}`;
+}
+
+async function guessState(lat, lng) {
+  // Very rough bounding-box guesses for common states
+  const states = [
+    { s:'OR', n:46.3,so:41.9,w:-124.6,e:-116.4 },
+    { s:'WA', n:49.0,so:45.5,w:-124.8,e:-116.9 },
+    { s:'CA', n:42.0,so:32.5,w:-124.5,e:-114.1 },
+    { s:'AZ', n:37.0,so:31.3,w:-114.8,e:-109.0 },
+    { s:'TX', n:36.5,so:25.8,w:-106.6,e:-93.5 },
+    { s:'FL', n:31.0,so:24.5,w:-87.6,e:-80.0 },
+    { s:'NY', n:45.0,so:40.5,w:-79.8,e:-71.8 },
+    { s:'IL', n:42.5,so:36.9,w:-91.5,e:-87.0 },
+    { s:'CO', n:41.0,so:37.0,w:-109.1,e:-102.0 },
+    { s:'HI', n:22.3,so:18.9,w:-160.3,e:-154.8 },
+  ];
+  const match = states.find(s => lat >= s.so && lat <= s.n && lng >= s.w && lng <= s.e);
+  return match ? match.s : null;
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

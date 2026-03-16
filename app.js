@@ -1,0 +1,530 @@
+/* =========================================================
+   US Community Resource Guide — app.js
+   Fetches from /api/* — no embedded data.
+   ========================================================= */
+
+const CAT_CLS = {
+  'Food & Groceries':'cc-food','Meals':'cc-meals','Shelter':'cc-shelter',
+  'Housing':'cc-housing','Health Care':'cc-health','Mental Health & Recovery':'cc-mental',
+  'Legal Services':'cc-legal','Employment & Job Training':'cc-emp',
+  'Benefits & Financial Aid':'cc-ben','Clothing':'cc-cloth',
+  'Day Services/Hygiene':'cc-day','Domestic Violence & Sexual Assault':'cc-dv',
+  'Youth Services':'cc-youth','Veteran Services':'cc-vet',
+  'Immigration':'cc-imm','Reentry Resources':'cc-re',
+  'Transportation':'cc-trans','Harm Reduction':'cc-harm',
+  'Pet Care':'cc-pet','Family & Parenting':'cc-fam',
+  'Disability & Aging':'cc-dis','Rental Assistance':'cc-rent',
+  'Government Services':'cc-gov','Libraries':'cc-lib',
+  'STI & HIV Services':'cc-sti'
+};
+const CAT_CLR = {
+  'Food & Groceries':'#2e7d32','Meals':'#388e3c','Shelter':'#1565c0','Housing':'#0277bd',
+  'Health Care':'#c2185b','Mental Health & Recovery':'#7b1fa2','Legal Services':'#e65100',
+  'Employment & Job Training':'#ef6c00','Benefits & Financial Aid':'#f57f17',
+  'Clothing':'#6d4c41','Day Services/Hygiene':'#00838f',
+  'Domestic Violence & Sexual Assault':'#ad1457','Youth Services':'#558b2f',
+  'Veteran Services':'#283593','Immigration':'#1a6b35','Reentry Resources':'#5d4037',
+  'Transportation':'#0288d1','Harm Reduction':'#bf360c','Pet Care':'#558b2f',
+  'Family & Parenting':'#6a1b9a','Disability & Aging':'#00695c',
+  'Rental Assistance':'#1976d2','Government Services':'#455a64',
+  'Libraries':'#546e7a','STI & HIV Services':'#880e4f'
+};
+
+// ── State ──────────────────────────────────────────────────
+const S = {
+  query: '', state: '', county: '', category: '',
+  page: 1, limit: 24, total: 0, pages: 0,
+  loading: false, debounce: null, statesData: []
+};
+
+// ── DOM ────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const searchInput   = $('searchInput');
+const searchClear   = $('searchClear');
+const stateFilter   = $('stateFilter');
+const countyFilter  = $('countyFilter');
+const categoryFilter= $('categoryFilter');
+const filterReset   = $('filterReset');
+const cardsGrid     = $('cardsGrid');
+const pagination    = $('pagination');
+const pageInfo      = $('pageInfo');
+const emptyState    = $('emptyState');
+const loadingState  = $('loadingState');
+const rsumWrap      = $('rsumWrap');
+const resultsSummary= $('resultsSummary');
+const hcount        = $('hcount');
+const pillTrack     = $('pillTrack');
+const modalOverlay  = $('modalOverlay');
+const modal         = $('modal');
+const modalClose    = $('modalClose');
+const modalTitle    = $('modalTitle');
+const modalLoc      = $('modalLoc');
+const modalBadge    = $('modalBadge');
+const modalActions  = $('modalActions');
+const modalHours    = $('modalHours');
+const modalBody     = $('modalBody');
+const toast         = $('toast');
+
+// ── Init ───────────────────────────────────────────────────
+async function init() {
+  try {
+    const res = await fetch('/api/meta');
+    const meta = await res.json();
+    hcount.textContent = meta.total.toLocaleString();
+    S.statesData = meta.states;
+
+    // State filter
+    for (const s of meta.states) {
+      const opt = document.createElement('option');
+      opt.value = s.name;
+      opt.textContent = s.name === 'National' ? '🌐 National (All States)' : s.name;
+      stateFilter.appendChild(opt);
+    }
+
+    // Category filter + pills
+    for (const { name } of meta.categories) {
+      const opt = document.createElement('option');
+      opt.value = name; opt.textContent = name;
+      categoryFilter.appendChild(opt);
+
+      const pill = document.createElement('button');
+      pill.className = 'pill'; pill.textContent = name; pill.dataset.cat = name;
+      pill.addEventListener('click', () => togglePill(pill, name));
+      pillTrack.appendChild(pill);
+    }
+  } catch (e) { console.error('Meta load failed:', e); }
+
+  fetchResources();
+  bindEvents();
+}
+
+// ── Fetch resources from API ───────────────────────────────
+async function fetchResources() {
+  if (S.loading) return;
+  S.loading = true;
+  loadingState.style.display = 'flex';
+  cardsGrid.style.opacity = '0.4';
+  emptyState.style.display = 'none';
+
+  const params = new URLSearchParams({
+    page: S.page, limit: S.limit
+  });
+  if (S.query)    params.set('q', S.query);
+  if (S.state)    params.set('state', S.state);
+  if (S.county)   params.set('county', S.county);
+  if (S.category) params.set('category', S.category);
+
+  try {
+    const res = await fetch(`/api/resources?${params}`);
+    const data = await res.json();
+    S.total = data.total;
+    S.pages = data.pages;
+    renderCards(data.items);
+    renderPager(data.page, data.pages, data.total);
+    updateSummary(data.total);
+  } catch (e) {
+    cardsGrid.innerHTML = '<p style="color:var(--rust);padding:20px;grid-column:1/-1">Error loading resources. Please refresh.</p>';
+  } finally {
+    S.loading = false;
+    loadingState.style.display = 'none';
+    cardsGrid.style.opacity = '1';
+  }
+}
+
+// ── Render cards ───────────────────────────────────────────
+function renderCards(items) {
+  cardsGrid.innerHTML = '';
+  if (!items.length) {
+    emptyState.style.display = 'block';
+    pagination.innerHTML = '';
+    pageInfo.style.display = 'none';
+    return;
+  }
+  emptyState.style.display = 'none';
+
+  const frag = document.createDocumentFragment();
+  items.forEach(r => {
+    const card = document.createElement('article');
+    card.className = 'card ' + (CAT_CLS[r.category] || '');
+    card.setAttribute('role', 'listitem');
+    card.setAttribute('tabindex', '0');
+    card.setAttribute('aria-label', r.name);
+
+    // Phone/map/location footer
+    let foot = '';
+    if (r.phone) {
+      const cp = r.phone.replace(/[^\d+]/g, '');
+      if (cp.length >= 7) {
+        foot += `<a href="tel:${cp}" class="cphone" onclick="event.stopPropagation()">
+          <svg viewBox="0 0 16 16" fill="none"><path d="M3 2h3l1.5 3.5-1.5 1a7 7 0 003.5 3.5l1-1.5L14 10v3a1 1 0 01-1 1C6 14 2 10 2 3a1 1 0 011-1z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
+          ${esc(r.phone)}</a>`;
+      }
+    }
+    if (r.address) {
+      foot += `<a href="https://maps.google.com/?q=${encodeURIComponent(r.address)}" target="_blank" rel="noopener" class="cmap" onclick="event.stopPropagation()">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M8 1a5 5 0 00-5 5c0 3.5 5 9 5 9s5-5.5 5-9a5 5 0 00-5-5zm0 7a2 2 0 110-4 2 2 0 010 4z" fill="currentColor"/></svg>Map</a>`;
+    }
+    const locText = r.state === 'National' ? '🌐 National'
+      : r.county === 'Statewide' ? r.state
+      : (r.county || '').replace(' County','').replace(' City','') + (r.state && r.state !== 'Oregon' ? ', ' + r.state.substring(0,2).toUpperCase() : '');
+    foot += `<span class="cloc${r.state === 'National' ? ' nat' : ''}">${esc(locText)}</span>`;
+
+    // Hours on card
+    const hoursHtml = r.hours ? `<div class="chours">
+      <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      ${esc(r.hours)}</div>` : '';
+
+    card.innerHTML = `
+      <div class="chead">
+        <h3 class="cname">${esc(r.name)}</h3>
+        <span class="ccat">${esc(r.category)}</span>
+      </div>
+      ${r.description ? `<p class="cdesc">${esc(r.description)}</p>` : ''}
+      ${hoursHtml}
+      <div class="cfoot">${foot}</div>`;
+
+    card.addEventListener('click', () => openModal(r));
+    card.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openModal(r); }
+    });
+    frag.appendChild(card);
+  });
+  cardsGrid.appendChild(frag);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+// ── Pagination ─────────────────────────────────────────────
+function renderPager(cur, tot, total) {
+  pagination.innerHTML = '';
+  pageInfo.style.display = 'none';
+
+  if (tot <= 1) {
+    if (total > 0) {
+      pageInfo.style.display = 'block';
+      pageInfo.textContent = `${total.toLocaleString()} result${total !== 1 ? 's' : ''}`;
+    }
+    return;
+  }
+
+  const nums = getPageNums(cur, tot);
+  pagination.appendChild(mkBtn('←', cur > 1, () => goPage(cur - 1)));
+  for (const p of nums) {
+    if (p === '…') {
+      const el = document.createElement('span');
+      el.className = 'pgdot'; el.textContent = '…';
+      pagination.appendChild(el);
+    } else {
+      const btn = mkBtn(p, true, () => goPage(p));
+      if (p === cur) btn.classList.add('active');
+      pagination.appendChild(btn);
+    }
+  }
+  pagination.appendChild(mkBtn('→', cur < tot, () => goPage(cur + 1)));
+
+  pageInfo.style.display = 'block';
+  const start = (cur - 1) * S.limit + 1;
+  const end = Math.min(cur * S.limit, total);
+  pageInfo.textContent = `Showing ${start.toLocaleString()}–${end.toLocaleString()} of ${total.toLocaleString()} results`;
+}
+
+function getPageNums(c, t) {
+  if (t <= 7) return Array.from({ length: t }, (_, i) => i + 1);
+  const p = [1];
+  if (c > 3) p.push('…');
+  for (let i = Math.max(2, c - 1); i <= Math.min(t - 1, c + 1); i++) p.push(i);
+  if (c < t - 2) p.push('…');
+  p.push(t);
+  return p;
+}
+
+function mkBtn(label, enabled, onClick) {
+  const btn = document.createElement('button');
+  btn.className = 'pgbtn'; btn.textContent = label; btn.disabled = !enabled;
+  if (enabled) btn.addEventListener('click', onClick);
+  return btn;
+}
+
+function goPage(p) {
+  S.page = p;
+  fetchResources();
+}
+
+// ── Summary ────────────────────────────────────────────────
+function updateSummary(total) {
+  const has = S.query || S.state || S.county || S.category;
+  rsumWrap.style.display = has ? 'block' : 'none';
+  if (has) {
+    const parts = [];
+    if (S.state) parts.push(S.state);
+    if (S.county) parts.push(S.county.replace(' County', ''));
+    if (S.category) parts.push(S.category);
+    if (S.query) parts.push(`"${S.query}"`);
+    resultsSummary.textContent = `${total.toLocaleString()} result${total !== 1 ? 's' : ''} · ${parts.join(' · ')}`;
+  }
+}
+
+// ── Modal ──────────────────────────────────────────────────
+let _curResource = null;
+
+function openModal(r) {
+  _curResource = r;
+  const cc = CAT_CLR[r.category] || '#e8442a';
+
+  modalBadge.textContent = r.category;
+  modalBadge.style.background = cc;
+  modalTitle.textContent = r.name;
+
+  const loc = r.state === 'National' ? '🌐 National Resource'
+    : r.county === 'Statewide' ? `${r.state} — Statewide`
+    : `${r.county} · ${r.state}`;
+  modalLoc.textContent = loc;
+
+  // Action buttons
+  modalActions.innerHTML = '';
+  if (r.phone) {
+    const cp = r.phone.replace(/[^\d+]/g, '');
+    if (cp.length >= 7) {
+      modalActions.innerHTML += `<a href="tel:${cp}" class="mbtn mbtn-p">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M3 2h3l1.5 3.5-1.5 1a7 7 0 003.5 3.5l1-1.5L14 10v3a1 1 0 01-1 1C6 14 2 10 2 3a1 1 0 011-1z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+        ${esc(r.phone)}</a>`;
+    } else {
+      modalActions.innerHTML += `<span class="mbtn mbtn-p" style="cursor:default">📱 ${esc(r.phone)}</span>`;
+    }
+  }
+  if (r.address) {
+    const mapUrl = `https://maps.google.com/?q=${encodeURIComponent(r.address)}`;
+    modalActions.innerHTML += `<a href="${mapUrl}" target="_blank" rel="noopener" class="mbtn mbtn-s">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M8 1a5 5 0 00-5 5c0 3.5 5 9 5 9s5-5.5 5-9a5 5 0 00-5-5zm0 7a2 2 0 110-4 2 2 0 010 4z" fill="currentColor"/></svg>
+      Directions</a>`;
+  }
+  if (r.website) {
+    const url = r.website.startsWith('http') ? r.website : 'https://' + r.website;
+    modalActions.innerHTML += `<a href="${url}" target="_blank" rel="noopener" class="mbtn mbtn-s">
+      <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M8 2c-2 0-3 2.5-3 6s1 6 3 6M8 2c2 0 3 2.5 3 6s-1 6-3 6M2 8h12" stroke="currentColor" stroke-width="1.5"/></svg>
+      Website</a>`;
+  }
+  modalActions.innerHTML += `<button onclick="shareResource()" class="mbtn mbtn-share">
+    <svg viewBox="0 0 16 16" fill="none"><path d="M12 4a2 2 0 11-4 0 2 2 0 014 0zm0 0l-8 4m8 4a2 2 0 11-4 0 2 2 0 014 0zm0 0L4 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    Share</button>`;
+
+  // Hours
+  modalHours.innerHTML = '';
+  if (r.hours) {
+    modalHours.innerHTML = `<div class="mhours">
+      <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M8 5v3l2 2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      <span><strong>Hours:</strong> ${esc(r.hours)}</span>
+    </div>`;
+  }
+
+  // Body
+  let body = '';
+  if (r.description) body += mfld('About', esc(r.description));
+
+  // Requirements
+  if (r.req && r.req.length) {
+    const items = Array.isArray(r.req) ? r.req : [r.req];
+    const listItems = items.map(i => `<li>${esc(i)}</li>`).join('');
+    body += `<div class="mfld">
+      <div class="mflbl req-lbl">✓ Requirements &amp; Eligibility</div>
+      <div class="mfval"><ul class="req-list">${listItems}</ul></div>
+    </div>`;
+  }
+
+  if (r.address) {
+    const mapUrl = `https://maps.google.com/?q=${encodeURIComponent(r.address)}`;
+    body += mfld('Address', `<a href="${mapUrl}" target="_blank" rel="noopener">${esc(r.address)}</a>`);
+  }
+  if (r.website) {
+    const url = r.website.startsWith('http') ? r.website : 'https://' + r.website;
+    body += mfld('Website', `<a href="${url}" target="_blank" rel="noopener">${esc(r.website)}</a>`);
+  }
+  modalBody.innerHTML = body;
+
+  modalOverlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+  setTimeout(() => modalClose.focus(), 60);
+}
+
+function mfld(label, value) {
+  return `<div class="mfld"><div class="mflbl">${label}</div><div class="mfval">${value}</div></div>`;
+}
+
+function closeModal() {
+  modalOverlay.style.display = 'none';
+  document.body.style.overflow = '';
+  _curResource = null;
+}
+
+function shareResource() {
+  const r = _curResource;
+  if (!r) return;
+  const text = [r.name, r.phone, r.address, r.website ? (r.website.startsWith('http') ? r.website : 'https://' + r.website) : '']
+    .filter(Boolean).join(' | ');
+  if (navigator.share) {
+    navigator.share({ title: r.name, text }).catch(() => {});
+  } else {
+    navigator.clipboard?.writeText(text).then(() => showToast('Copied to clipboard!'));
+  }
+}
+
+function showToast(msg) {
+  toast.textContent = msg;
+  toast.style.display = 'block';
+  setTimeout(() => { toast.style.display = 'none'; }, 2200);
+}
+
+// ── Filters & Events ───────────────────────────────────────
+function populateCounties(stateName) {
+  countyFilter.innerHTML = '<option value="">All Counties / Regions</option>';
+  if (!stateName) { countyFilter.disabled = true; return; }
+  const found = S.statesData.find(s => s.name === stateName);
+  if (!found) { countyFilter.disabled = true; return; }
+  countyFilter.disabled = false;
+  for (const co of found.counties) {
+    const opt = document.createElement('option');
+    opt.value = co; opt.textContent = co;
+    countyFilter.appendChild(opt);
+  }
+}
+
+function togglePill(btn, name) {
+  S.category = S.category === name ? '' : name;
+  categoryFilter.value = S.category;
+  syncPills(); S.page = 1; fetchResources();
+}
+
+function syncPills() {
+  document.querySelectorAll('.pill').forEach(p =>
+    p.classList.toggle('active', p.dataset.cat === S.category)
+  );
+}
+
+function resetAll() {
+  searchInput.value = ''; searchClear.hidden = true;
+  stateFilter.value = ''; countyFilter.value = ''; categoryFilter.value = '';
+  countyFilter.disabled = true;
+  countyFilter.innerHTML = '<option value="">All Counties / Regions</option>';
+  S.query = ''; S.state = ''; S.county = ''; S.category = '';
+  S.page = 1; syncPills(); fetchResources(); searchInput.focus();
+}
+
+function bindEvents() {
+  searchInput.addEventListener('input', () => {
+    const val = searchInput.value.trim();
+    searchClear.hidden = !val;
+    clearTimeout(S.debounce);
+    S.debounce = setTimeout(() => {
+      S.query = val; S.page = 1; fetchResources();
+    }, 300);
+  });
+
+  searchClear.addEventListener('click', () => {
+    searchInput.value = ''; searchClear.hidden = true;
+    S.query = ''; S.page = 1; fetchResources(); searchInput.focus();
+  });
+
+  stateFilter.addEventListener('change', () => {
+    S.state = stateFilter.value; S.county = ''; S.page = 1;
+    populateCounties(stateFilter.value);
+    countyFilter.value = '';
+    fetchResources();
+  });
+
+  countyFilter.addEventListener('change', () => {
+    S.county = countyFilter.value; S.page = 1; fetchResources();
+  });
+
+  categoryFilter.addEventListener('change', () => {
+    S.category = categoryFilter.value; S.page = 1; syncPills(); fetchResources();
+  });
+
+  filterReset.addEventListener('click', resetAll);
+  modalClose.addEventListener('click', closeModal);
+  modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+}
+
+// ── Utilities ──────────────────────────────────────────────
+function esc(s) {
+  return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// ── Boot ───────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', init);
+
+// ── AI CHAT ASSISTANT ──────────────────────────────────────────────────
+
+const chatFab   = document.getElementById('chatFab');
+const chatPanel = document.getElementById('chatPanel');
+const chatClose = document.getElementById('chatClose');
+const chatMessages = document.getElementById('chatMessages');
+const chatInput = document.getElementById('chatInput');
+const chatSend  = document.getElementById('chatSend');
+
+function openChat() { chatPanel.style.display = 'flex'; chatInput.focus(); }
+function closeChat() { chatPanel.style.display = 'none'; }
+
+chatFab.addEventListener('click', () => {
+  chatPanel.style.display === 'none' ? openChat() : closeChat();
+});
+chatClose.addEventListener('click', closeChat);
+
+chatInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+});
+chatSend.addEventListener('click', sendMessage);
+
+function addMessage(text, role) {
+  const div = document.createElement('div');
+  div.className = `chat-msg chat-msg-${role}`;
+  const bubble = document.createElement('div');
+  bubble.className = 'chat-bubble';
+  bubble.textContent = text;
+  div.appendChild(bubble);
+  chatMessages.appendChild(div);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  return div;
+}
+
+function addTyping() {
+  const div = document.createElement('div');
+  div.className = 'chat-msg chat-msg-bot chat-typing';
+  div.id = 'chatTyping';
+  div.innerHTML = '<div class="chat-bubble">Finding resources…</div>';
+  chatMessages.appendChild(div);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+function removeTyping() {
+  const t = document.getElementById('chatTyping');
+  if (t) t.remove();
+}
+
+async function sendMessage() {
+  const q = chatInput.value.trim();
+  if (!q) return;
+  chatInput.value = '';
+  chatSend.disabled = true;
+
+  addMessage(q, 'user');
+  addTyping();
+
+  try {
+    const res = await fetch('/api/ask', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        question: q,
+        state: S.state || '',
+        county: S.county || ''
+      })
+    });
+    const data = await res.json();
+    removeTyping();
+    addMessage(data.answer || data.error || 'Sorry, something went wrong. Try again.', 'bot');
+  } catch (e) {
+    removeTyping();
+    addMessage('Could not reach the assistant. Check your connection and try again.', 'bot');
+  }
+  chatSend.disabled = false;
+  chatInput.focus();
+}
