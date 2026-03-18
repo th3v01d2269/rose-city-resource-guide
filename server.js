@@ -89,7 +89,11 @@ app.get('/api/resources', (req, res) => {
     indices = indices.filter(i => matched.has(i));
   }
   if (state) indices = indices.filter(i => resources[i].state === state);
-  if (county) indices = indices.filter(i => resources[i].county === county);
+  if (county) indices = indices.filter(i => {
+    const co = resources[i].county;
+    // Always include Statewide and National resources regardless of county filter
+    return co === county || co === 'Statewide' || co === 'National';
+  });
   if (category) indices = indices.filter(i => resources[i].category === category);
   const total = indices.length;
   const start = (pageNum - 1) * limitNum;
