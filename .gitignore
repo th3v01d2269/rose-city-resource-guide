@@ -3,3 +3,6 @@ node_modules/
 .DS_Store
 *.log
 .env
+
+# Keep legal name private — license distributed separately
+LICENSE

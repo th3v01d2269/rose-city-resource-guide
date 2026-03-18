@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<!-- COPYRIGHT NOTICE -->
+<!-- © 2026 US Community Resource Guide -->
+<!-- Licensed under CC BY-NC 4.0. Commercial use requires written permission. -->
+<!-- https://rose-city-resource-guide.onrender.com/support -->
+
+<meta charset="UTF-8">
+  <meta name="license" content="https://creativecommons.org/licenses/by-nc/4.0/">
+  
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#1a1a1a">
+<title>Support the US Community Resource Guide</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --rust:#e8442a;--rust-d:#c23220;--rust-l:#fdf0ee;
+  --coal:#1a1a1a;--coal-m:#2c2c2c;--warm:#faf8f5;--off:#f2ede8;
+  --bdr:#ddd8d2;--txt:#1a1a1a;--stone:#6b6560;
+  --green:#1b5e20;--green-l:#e8f5e9;--blue:#0277bd;--blue-l:#e3f2fd;
+  --fd:'Barlow Condensed',sans-serif;--fb:'Barlow',sans-serif;--mw:720px
+}
+body{font-family:var(--fb);background:var(--warm);color:var(--txt);min-height:100vh}
+.ebar{background:var(--coal);padding:5px 12px;font-family:var(--fd);font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;display:flex;flex-wrap:wrap;gap:2px 7px;align-items:center}
+.elbl{color:var(--rust);font-weight:800}
+.ea{color:#e8e4de;text-decoration:none;padding:2px 5px;border-radius:2px}
+.ea:hover{background:var(--rust);color:#fff}
+.sep{color:#444}
+.hdr{background:var(--coal);border-bottom:3px solid var(--rust);padding:14px}
+.hdr-i{max-width:var(--mw);margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.back{color:#aaa;text-decoration:none;font-family:var(--fd);font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;display:flex;align-items:center;gap:4px}
+.back:hover{color:#fff}
+.htitle{font-family:var(--fd);font-size:20px;font-weight:800;color:#fff;text-transform:uppercase;text-align:center}
+.htitle span{color:var(--rust)}
+.main{max-width:var(--mw);margin:0 auto;padding:24px 14px 60px}
+/* Cards */
+.sec{margin-bottom:28px}
+.sec-title{font-family:var(--fd);font-size:18px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:var(--coal);margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--off);display:flex;align-items:center;gap:8px}
+.card{background:#fff;border:1.5px solid var(--bdr);border-radius:8px;padding:18px;margin-bottom:12px}
+.card.red{border-left:3px solid var(--rust)}
+.card.green{border-left:3px solid var(--green)}
+.card.blue{border-left:3px solid var(--blue)}
+.card-title{font-family:var(--fd);font-size:15px;font-weight:700;color:var(--coal);margin-bottom:6px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.card-title a{font-size:11px;font-weight:700;font-family:var(--fd);text-transform:uppercase;letter-spacing:.04em;color:var(--blue);text-decoration:none;padding:3px 8px;border:1px solid var(--blue);border-radius:4px}
+.card-title a:hover{background:var(--blue);color:#fff}
+.card p{font-size:13px;color:var(--stone);line-height:1.6;margin-bottom:8px}
+.card p:last-child{margin-bottom:0}
+.card strong{color:var(--coal)}
+/* Donate buttons */
+.donate-hero{background:linear-gradient(135deg,var(--coal) 0%,var(--coal-m) 100%);border-radius:12px;padding:28px 24px;text-align:center;margin-bottom:24px;border:2px solid var(--rust)}
+.donate-hero h2{font-family:var(--fd);font-size:clamp(22px,5vw,30px);font-weight:800;text-transform:uppercase;color:#fff;margin-bottom:8px}
+.donate-hero h2 span{color:var(--rust)}
+.donate-hero p{color:#aaa;font-size:13.5px;line-height:1.6;margin-bottom:20px;max-width:480px;margin-left:auto;margin-right:auto}
+.donate-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.dbtn{font-family:var(--fd);font-size:15px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;padding:13px 24px;border-radius:8px;text-decoration:none;display:inline-flex;align-items:center;gap:7px;transition:all .15s;white-space:nowrap}
+.dbtn-venmo{background:#008CFF;color:#fff;box-shadow:0 3px 14px rgba(0,140,255,.35)}
+.dbtn-venmo:hover{background:#0070d9;transform:translateY(-1px)}
+.dbtn-chime{background:#14A847;color:#fff;box-shadow:0 3px 14px rgba(20,168,71,.35)}
+.dbtn-chime:hover{background:#0f8a3a;transform:translateY(-1px)}
+.dbtn-gh{background:#333;color:#fff;border:1px solid #555}
+.dbtn-gh:hover{border-color:var(--rust);color:var(--rust)}
+/* Costs breakdown */
+.cost-table{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0}
+.cost-table th{font-family:var(--fd);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--stone);padding:6px 10px;text-align:left;border-bottom:1.5px solid var(--bdr)}
+.cost-table td{padding:8px 10px;border-bottom:1px solid var(--off);color:var(--txt);vertical-align:top}
+.cost-table tr:last-child td{border-bottom:none}
+.cost-free{color:var(--green);font-weight:600;font-family:var(--fd)}
+.cost-paid{color:var(--rust);font-weight:600;font-family:var(--fd)}
+/* Grant status badges */
+.gbadge{font-family:var(--fd);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:2px 8px;border-radius:9px;white-space:nowrap}
+.gb-open{background:var(--green-l);color:var(--green)}
+.gb-rolling{background:var(--blue-l);color:var(--blue)}
+.gb-prep{background:#fff8e1;color:#e65100}
+/* License table */
+.lic-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.lic-table th{font-family:var(--fd);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--stone);padding:6px 8px;text-align:left;border-bottom:1.5px solid var(--bdr)}
+.lic-table td{padding:7px 8px;border-bottom:1px solid var(--off);vertical-align:top}
+.lic-ok{color:var(--green);font-weight:600}
+.lic-note{color:var(--stone);font-size:11px}
+@media(max-width:480px){.donate-btns{flex-direction:column;align-items:center}.dbtn{width:100%;justify-content:center}}
+</style>
+</head>
+<body>
+
+<div class="ebar">
+  <span class="elbl">CRISIS</span>
+  <a href="tel:988" class="ea">988</a><span class="sep">·</span>
+  <a href="tel:211" class="ea">211</a><span class="sep">·</span>
+  <a href="tel:911" class="ea">911</a>
+</div>
+
+<header class="hdr">
+  <div class="hdr-i">
+    <a href="/" class="back">
+      <svg viewBox="0 0 16 16" fill="none" width="13" height="13"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Back
+    </a>
+    <h1 class="htitle">❤️ <span>Support</span> the Guide</h1>
+    <div style="width:52px"></div>
+  </div>
+</header>
+
+<div class="main">
+
+  <!-- DONATE HERO -->
+  <div class="donate-hero">
+    <h2>Keep It <span>Free</span> for Everyone</h2>
+    <p>This guide is 100% free — no ads, no paywalls, no data selling. 2,088 resources available to anyone who needs them. Server costs run ~$7/month on Render. Any amount helps keep it online.</p>
+    <div class="donate-btns">
+      <a href="https://venmo.com/th3v01d" target="_blank" rel="noopener noreferrer" class="dbtn dbtn-venmo">
+        💜 Venmo @th3v01d
+      </a>
+      <a href="https://cash.app/$m4ddh4tt3r" target="_blank" rel="noopener noreferrer" class="dbtn dbtn-chime">
+        💚 Chime $m4ddh4tt3r
+      </a>
+      <a href="https://github.com/th3v01d2269/rose-city-resource-guide" target="_blank" rel="noopener noreferrer" class="dbtn dbtn-gh">
+        ⭐ Star on GitHub
+      </a>
+    </div>
+  </div>
+
+  <!-- WHAT IT COSTS -->
+  <div class="sec">
+    <div class="sec-title">💰 What It Actually Costs to Run</div>
+    <div class="card">
+      <table class="cost-table">
+        <tr>
+          <th>Service</th>
+          <th>Cost</th>
+          <th>What It Does</th>
+        </tr>
+        <tr>
+          <td><strong>Render.com</strong> (hosting)</td>
+          <td class="cost-paid">~$7/mo</td>
+          <td>Serves the entire site — 2,088 resources, search, AI, map</td>
+        </tr>
+        <tr>
+          <td><strong>OpenFreeMap</strong> (map tiles)</td>
+          <td class="cost-free">FREE</td>
+          <td>Interactive map — MIT license, no API key, no limits</td>
+        </tr>
+        <tr>
+          <td><strong>MapLibre GL JS</strong> (map renderer)</td>
+          <td class="cost-free">FREE</td>
+          <td>WebGL map engine — BSD license, open source</td>
+        </tr>
+        <tr>
+          <td><strong>OpenStreetMap</strong> (map data)</td>
+          <td class="cost-free">FREE</td>
+          <td>Map data — ODbL license, attribution required ✓</td>
+        </tr>
+        <tr>
+          <td><strong>Nominatim</strong> (reverse geocoding)</td>
+          <td class="cost-free">FREE</td>
+          <td>Converts GPS to city/state — OSM-operated, free for light use</td>
+        </tr>
+        <tr>
+          <td><strong>Groq API</strong> (AI assistant)</td>
+          <td class="cost-free">FREE tier</td>
+          <td>AI-powered resource recommendations — free tier covers current use</td>
+        </tr>
+        <tr>
+          <td><strong>Google Fonts</strong></td>
+          <td class="cost-free">FREE</td>
+          <td>Barlow Condensed typography — free for all use</td>
+        </tr>
+        <tr>
+          <td><strong>GitHub</strong> (source code)</td>
+          <td class="cost-free">FREE</td>
+          <td>Version control and deployment — public repo, free tier</td>
+        </tr>
+        <tr>
+          <td style="font-weight:700">Total Monthly</td>
+          <td class="cost-paid" style="font-weight:700">~$7/mo</td>
+          <td style="color:var(--stone)">$84/year to keep 2,088+ resources publicly accessible</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- PERMISSIONS & LICENSES -->
+  <div class="sec">
+    <div class="sec-title">✅ Licenses & Permissions — All Clear</div>
+    <p style="font-size:13px;color:var(--stone);margin-bottom:12px;line-height:1.5">Every component of this project is either MIT/BSD licensed (no restrictions), ODbL licensed (attribution required), or covered by a free-use API policy. No permissions need to be acquired — all are already cleared.</p>
+    <div class="card">
+      <table class="lic-table">
+        <tr>
+          <th>Component</th>
+          <th>License</th>
+          <th>Requirements</th>
+        </tr>
+        <tr>
+          <td><strong>OpenFreeMap</strong></td>
+          <td class="lic-ok">MIT</td>
+          <td class="lic-note">✓ No restrictions — use freely, commercially, no attribution required (though appreciated)</td>
+        </tr>
+        <tr>
+          <td><strong>MapLibre GL JS</strong></td>
+          <td class="lic-ok">BSD 3-Clause</td>
+          <td class="lic-note">✓ No restrictions — open source, commercial use allowed</td>
+        </tr>
+        <tr>
+          <td><strong>OpenStreetMap data</strong></td>
+          <td class="lic-ok">ODbL</td>
+          <td class="lic-note">✓ Attribution required — "© OpenStreetMap contributors" shown in map corner. Commercial use allowed.</td>
+        </tr>
+        <tr>
+          <td><strong>Nominatim API</strong></td>
+          <td class="lic-ok">Free (low volume)</td>
+          <td class="lic-note">✓ OSM-operated free service — usage policy allows geocoding at our scale. User-Agent header set correctly.</td>
+        </tr>
+        <tr>
+          <td><strong>Express.js</strong></td>
+          <td class="lic-ok">MIT</td>
+          <td class="lic-note">✓ No restrictions</td>
+        </tr>
+        <tr>
+          <td><strong>Node.js</strong></td>
+          <td class="lic-ok">MIT</td>
+          <td class="lic-note">✓ No restrictions</td>
+        </tr>
+        <tr>
+          <td><strong>Groq API</strong></td>
+          <td class="lic-ok">Commercial OK</td>
+          <td class="lic-note">✓ API terms allow commercial use — free tier with rate limits</td>
+        </tr>
+        <tr>
+          <td><strong>Anthropic Claude API</strong></td>
+          <td class="lic-ok">Commercial OK</td>
+          <td class="lic-note">✓ API terms allow commercial/public-benefit use with API key</td>
+        </tr>
+        <tr>
+          <td><strong>Google Fonts</strong></td>
+          <td class="lic-ok">SIL Open Font</td>
+          <td class="lic-note">✓ Free for all use — no attribution required</td>
+        </tr>
+        <tr>
+          <td><strong>Resource data (211, etc.)</strong></td>
+          <td class="lic-ok">Public info</td>
+          <td class="lic-note">✓ All resource listings (names, addresses, phone numbers) are factual public information — no copyright</td>
+        </tr>
+      </table>
+    </div>
+  </div>
+
+  <!-- GOVERNMENT GRANTS -->
+  <div class="sec" id="grants">
+    <div class="sec-title">📋 Government & Foundation Grant Opportunities</div>
+    <p style="font-size:13px;color:var(--stone);margin-bottom:14px;line-height:1.5">
+      This project aligns well with several federal and foundation funding streams. Most require nonprofit (501c3) status or a fiscal sponsor. The Oregon Community Foundation, Community Action Agencies, or a local nonprofit could serve as fiscal sponsors.
+    </p>
+
+    <div class="card green">
+      <div class="card-title">
+        HHS / ACF Social Services Technology Grant
+        <span class="gbadge gb-rolling">Rolling Applications</span>
+      </div>
+      <p>The Administration for Children and Families funds technology projects that improve access to social services for low-income populations. This guide — connecting unhoused people, vehicle dwellers, and low-income families to 2,088 free resources — aligns directly with ACF's mission.</p>
+      <p><strong>Apply at:</strong> grants.gov · Search: "ACF social services technology" · Agency: HHS/ACF</p>
+      <p><strong>Typical award:</strong> $50K–$500K · Requires: 501c3 or fiscal sponsor, SAM.gov registration, UEI number</p>
+    </div>
+
+    <div class="card green">
+      <div class="card-title">
+        SAMHSA Homelessness Prevention Technology
+        <span class="gbadge gb-rolling">Annual NOFO</span>
+      </div>
+      <p>SAMHSA funds projects addressing mental health, substance use, and homelessness. A resource guide that connects people to mental health, recovery, and safe parking resources fits their Continuum of Care priorities.</p>
+      <p><strong>Apply at:</strong> samhsa.gov/grants · Search: "PATH Program" or "Continuum of Care"</p>
+      <p><strong>Typical award:</strong> $100K–$1M · Requires: 501c3, SAM.gov, matching funds often required</p>
+    </div>
+
+    <div class="card green">
+      <div class="card-title">
+        HUD Continuum of Care (CoC) Technology Grant
+        <span class="gbadge gb-rolling">Annual — Fall NOFO</span>
+      </div>
+      <p>HUD's CoC program funds local homelessness response systems. A centralized resource directory with safe parking, shelter, and housing navigation serves CoC goals. Apply through your local Continuum of Care (Oregon CoC contact: Community Connect 503-640-3263).</p>
+      <p><strong>Apply at:</strong> hud.gov/program_offices/comm_planning/coc · Local CoC: Community Connect</p>
+      <p><strong>Typical award:</strong> $50K–$2M · Requires: Apply through local CoC lead agency</p>
+    </div>
+
+    <div class="card blue">
+      <div class="card-title">
+        USDA Rural Development Community Facilities Grant
+        <span class="gbadge gb-rolling">Rolling Applications</span>
+      </div>
+      <p>USDA funds essential community facilities in rural areas — including public health and safety services. This guide serves rural Oregon and all 50 states, making it eligible for rural technology infrastructure grants.</p>
+      <p><strong>Apply at:</strong> rd.usda.gov/programs-services/community-facilities/community-facilities-direct-loan-grant-program</p>
+      <p><strong>Typical award:</strong> Up to $50K for technology</p>
+    </div>
+
+    <div class="card blue">
+      <div class="card-title">
+        Oregon Community Foundation — Technology & Innovation
+        <span class="gbadge gb-rolling">Rolling</span>
+      </div>
+      <p>OCF funds Oregon nonprofits improving social services. A resource guide specific to Oregon with 600+ local resources is a strong candidate. OCF also provides fiscal sponsorship options for projects without their own 501c3.</p>
+      <p><strong>Apply at:</strong> oregoncf.org/grants · Contact: grants@oregoncf.org</p>
+      <p><strong>Typical award:</strong> $5K–$50K for technology projects</p>
+    </div>
+
+    <div class="card blue">
+      <div class="card-title">
+        Meyer Memorial Trust — Oregon Social Services
+        <span class="gbadge gb-rolling">Rolling</span>
+      </div>
+      <p>Oregon's largest private foundation — funds projects serving low-income Oregonians. A free public resource directory with 600+ Oregon resources aligns with their housing stability and economic opportunity priorities.</p>
+      <p><strong>Apply at:</strong> mmt.org/grants · Portland-based foundation, Oregon focus</p>
+      <p><strong>Typical award:</strong> $25K–$250K</p>
+    </div>
+
+    <div class="card blue">
+      <div class="card-title">
+        Ford Foundation — Technology for Social Justice
+        <span class="gbadge gb-prep">Competitive</span>
+      </div>
+      <p>Ford funds technology projects that advance equity and economic opportunity. A community-built resource guide for unhoused and low-income populations that is open-source and community-submitted fits their digital equity focus.</p>
+      <p><strong>Apply at:</strong> fordfoundation.org/work/challenging-inequality · Requires 501c3</p>
+      <p><strong>Typical award:</strong> $100K–$1M</p>
+    </div>
+
+    <div class="card" style="background:var(--off)">
+      <div class="card-title">📝 How to Apply: Step-by-Step</div>
+      <p><strong>1. Register on SAM.gov</strong> — Every federal grant requires a Unique Entity Identifier (UEI). Free at sam.gov. Takes 1-2 weeks.</p>
+      <p><strong>2. Get a fiscal sponsor</strong> — Without a 501c3, partner with Community Action (503-648-6646), OCF, or Oregon Nonprofit Association for fiscal sponsorship. They handle compliance for a small fee (~5-8%).</p>
+      <p><strong>3. Register on grants.gov</strong> — Federal grant portal. Free. Required for HHS, SAMHSA, HUD, and USDA applications.</p>
+      <p><strong>4. Document impact</strong> — Track monthly: page views, unique users, resources searched, community submissions. Grant applications need data.</p>
+      <p><strong>5. Write a one-page summary</strong> — "2,088 free resources, 50 states, 0 ads, open-source. Serving people experiencing homelessness, vehicle dwellers, and low-income families."</p>
+    </div>
+  </div>
+
+  <!-- OTHER WAYS TO HELP -->
+  <div class="sec">
+    <div class="sec-title">🤝 Other Ways to Help</div>
+    <div class="card red">
+      <div class="card-title">Share the Guide</div>
+      <p>The most valuable thing you can do is share it. Post to r/vandwellers, r/urbancamping, r/Portland, local Facebook groups, NextDoor, and any community org you know. Every person who finds a resource they need is the point.</p>
+    </div>
+    <div class="card red">
+      <div class="card-title">Submit Resources
+        <a href="/submit" target="_blank" rel="noopener noreferrer">Submit →</a>
+      </div>
+      <p>Know a food pantry, shelter, safe parking spot, or free clinic not in the guide? Submit it. Community knowledge is what makes this valuable.</p>
+    </div>
+    <div class="card red">
+      <div class="card-title">Star on GitHub
+        <a href="https://github.com/th3v01d2269/rose-city-resource-guide" target="_blank" rel="noopener noreferrer">GitHub →</a>
+      </div>
+      <p>The guide is fully open-source. Stars help visibility and signal credibility to grant reviewers. Issues and pull requests welcome.</p>
+    </div>
+  </div>
+
+  <!-- COPYRIGHT -->
+  <div class="sec">
+    <div class="sec-title">©️ Copyright &amp; Legal Protection</div>
+    <div class="card red">
+      <div class="card-title">Your Rights as Creator</div>
+      <p>This project is <strong>© 2026 US Community Resource Guide</strong>. All original code, design, curation, and structure is protected under copyright law from the moment of creation — no registration required in the US (Berne Convention).</p>
+      <p><strong>License:</strong> Creative Commons Attribution-NonCommercial 4.0 (CC BY-NC 4.0). Anyone can use, share, or remix it freely — but <strong>cannot profit from it without your written permission and payment to you.</strong></p>
+      <p><strong>What this means:</strong> If a company, nonprofit, or individual wants to sell this, license it, use it in a paid product, or make money from it in any way — they must contact you and compensate you first. The LICENSE file in the GitHub repo is legally binding.</p>
+    </div>
+    <div class="card" style="background:var(--off)">
+      <div class="card-title">For Commercial Licensing Contact</div>
+      <p>
+        📧 <strong>th3v01d2269@gmail.com</strong><br>
+        💜 Venmo: <strong>@th3v01d</strong><br>
+        💚 Chime: <strong>$m4ddh4tt3r</strong><br>
+        🐙 GitHub: <strong>github.com/th3v01d2269</strong>
+      </p>
+      <p style="margin-top:8px;font-size:12px;color:var(--stone)">Any commercial use without written agreement is a violation of the CC BY-NC 4.0 license and subject to DMCA takedown and legal action.</p>
+    </div>
+    <div class="card">
+      <div class="card-title">Attribution Required</div>
+      <p>Anyone sharing or building on this work must credit: <strong>"US Community Resource Guide"</strong> with a link to <strong>rose-city-resource-guide.onrender.com</strong>.</p>
+      <p>The full LICENSE file is in the GitHub repository. The project copyright notice appears in every source file.</p>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
