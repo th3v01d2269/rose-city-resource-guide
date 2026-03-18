@@ -286,3 +286,11 @@ body { font-family: var(--fb); background: var(--warm); color: var(--txt); line-
   .chat-panel { right: 8px; bottom: 80px; width: calc(100vw - 16px); }
   .chat-fab { right: 14px; bottom: 18px; }
 }
+
+/* ── NEAR ME SPINNER ── */
+.nmspinner {
+  display: inline-block; width: 13px; height: 13px;
+  border: 2px solid rgba(255,255,255,.35);
+  border-top-color: #fff; border-radius: 50%;
+  animation: spin .6s linear infinite; flex-shrink: 0;
+}

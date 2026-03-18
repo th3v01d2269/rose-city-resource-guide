@@ -124,6 +124,7 @@ async function init() {
   fetchResources();
   bindEvents();
   loadLearnedCount();
+  restoreNearMeState();
 }
 
 async function loadLearnedCount() {
@@ -511,6 +512,141 @@ function esc(s) {
 }
 
 // ── Boot ───────────────────────────────────────────────────
+
+// ── Near Me — uses GPS + reverse geocode to set state/county ──────────
+async function findNearMe() {
+  const btn = document.getElementById('nearMeBtn');
+  const lbl = document.getElementById('nearMeLabel');
+
+  if (!navigator.geolocation) {
+    showLocToast('⚠️ Location not supported on this browser');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = `<span class="nmspinner"></span><span>Locating…</span>`;
+  showLocToast('📍 Getting your location…');
+
+  navigator.geolocation.getCurrentPosition(
+    async (pos) => {
+      const { latitude: lat, longitude: lng } = pos.coords;
+      showLocToast('🔍 Finding your area…');
+
+      try {
+        // Reverse geocode with OpenStreetMap Nominatim (free, no API key)
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json&zoom=10`,
+          { headers: { 'Accept-Language': 'en' } }
+        );
+        const data = await res.json();
+        const addr = data.address || {};
+
+        // Extract state and county
+        const stateName = addr.state || '';
+        const countyRaw = addr.county || addr.city_district || '';
+        const county = countyRaw
+          ? (countyRaw.includes('County') ? countyRaw : countyRaw + ' County')
+          : '';
+
+        if (!stateName) {
+          showLocToast('⚠️ Could not detect your location. Try selecting a state manually.');
+          resetNearMeBtn();
+          return;
+        }
+
+        // Apply the filters
+        const stateEl = document.getElementById('stateFilter');
+        const countyEl = document.getElementById('countyFilter');
+
+        // Set state
+        S.state = stateName;
+        stateEl.value = stateName;
+        localStorage.setItem('rcg_state', stateName);
+
+        // Populate counties then set county
+        populateCounties(stateName);
+        if (county) {
+          // Try exact match first, then prefix match
+          const opts = [...countyEl.options].map(o => o.value);
+          const match = opts.find(o => o === county)
+            || opts.find(o => o.toLowerCase().includes(countyRaw.toLowerCase()))
+            || opts.find(o => countyRaw.toLowerCase().includes(o.replace(' County','').toLowerCase()));
+
+          if (match) {
+            S.county = match;
+            countyEl.value = match;
+            localStorage.setItem('rcg_county', match);
+          }
+        }
+
+        S.page = 1;
+        fetchResources();
+
+        const locDesc = S.county
+          ? `${S.county.replace(' County','')} · ${stateName}`
+          : stateName;
+        showLocToast(`✅ Showing resources near you — ${locDesc}`);
+
+        btn.disabled = false;
+        btn.classList.add('active');
+        btn.innerHTML = `<svg viewBox="0 0 20 20" fill="none" width="15" height="15"><circle cx="10" cy="10" r="3" fill="currentColor"/><path d="M10 2v2.5M10 15.5V18M2 10h2.5M15.5 10H18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/></svg><span>Near Me ✓</span>`;
+
+        // Save coordinates for parking page
+        localStorage.setItem('rcg_lat', lat);
+        localStorage.setItem('rcg_lng', lng);
+
+      } catch (e) {
+        console.error('Reverse geocode error:', e);
+        showLocToast('⚠️ Could not detect area. Select your state manually.');
+        resetNearMeBtn();
+      }
+    },
+    (err) => {
+      let msg = '⚠️ Location denied.';
+      if (err.code === 1) msg = '⚠️ Location access denied. Allow it in your browser settings.';
+      if (err.code === 2) msg = '⚠️ Could not detect location. Select state manually.';
+      if (err.code === 3) msg = '⚠️ Location timed out. Try again.';
+      showLocToast(msg);
+      resetNearMeBtn();
+    },
+    { timeout: 12000, maximumAge: 300000, enableHighAccuracy: false }
+  );
+}
+
+function resetNearMeBtn() {
+  const btn = document.getElementById('nearMeBtn');
+  if (!btn) return;
+  btn.disabled = false;
+  btn.classList.remove('active');
+  btn.innerHTML = `<svg viewBox="0 0 20 20" fill="none" width="15" height="15"><circle cx="10" cy="10" r="3" fill="currentColor"/><path d="M10 2v2.5M10 15.5V18M2 10h2.5M15.5 10H18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/></svg><span>Near Me</span>`;
+}
+
+function showLocToast(msg) {
+  // Remove existing toast
+  const old = document.getElementById('locToast');
+  if (old) old.remove();
+  const t = document.createElement('div');
+  t.className = 'loc-toast';
+  t.id = 'locToast';
+  t.textContent = msg;
+  document.body.appendChild(t);
+  clearTimeout(window._toastTimer);
+  window._toastTimer = setTimeout(() => t.remove(), 3500);
+}
+
+// Also restore Near Me active state if location was previously set
+function restoreNearMeState() {
+  const savedLat = localStorage.getItem('rcg_lat');
+  const savedState = localStorage.getItem('rcg_state');
+  if (savedLat && savedState) {
+    const btn = document.getElementById('nearMeBtn');
+    if (btn) {
+      btn.classList.add('active');
+      btn.innerHTML = `<svg viewBox="0 0 20 20" fill="none" width="15" height="15"><circle cx="10" cy="10" r="3" fill="currentColor"/><path d="M10 2v2.5M10 15.5V18M2 10h2.5M15.5 10H18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/></svg><span>Near Me ✓</span>`;
+    }
+  }
+}
+
 document.addEventListener('DOMContentLoaded', init);
 
 // ── AI CHAT ASSISTANT ──────────────────────────────────────────────────
