@@ -91,6 +91,16 @@
     </div>
   </div>
 
+
+  <!-- PARKING FINDER BANNER -->
+  <div style="background:#1b5e20;padding:10px 14px;text-align:center">
+    <a href="/parking" style="color:#fff;text-decoration:none;font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:700;letter-spacing:.04em;display:inline-flex;align-items:center;gap:8px">
+      🚗 <span>SAFE OVERNIGHT PARKING FINDER</span>
+      <span style="background:rgba(255,255,255,.2);padding:2px 8px;border-radius:10px;font-size:11px">NEW</span>
+      <span style="opacity:.7">→</span>
+    </a>
+  </div>
+
   <!-- CATEGORY PILLS -->
   <div class="pills" role="navigation" aria-label="Category quick filter">
     <div class="pill-track" id="pillTrack"></div>
@@ -130,6 +140,11 @@
   <footer class="foot">
     <div class="foot-i">
       <p><strong>US Community Resource Guide</strong> — 2,037 verified free resources across all 50 states, DC, and Puerto Rico. The most comprehensive social services directory available.</p>
+      <p style="margin-bottom:8px">
+        <a href="/parking" style="display:inline-flex;align-items:center;gap:6px;background:#1b5e20;color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:8px 16px;border-radius:6px;text-decoration:none">
+          🚗 Safe Overnight Parking Finder
+        </a>
+      </p>
       <p class="fnote">Always call ahead — hours, eligibility, and availability change. In a crisis: call 988 (mental health), 211 (local resources), or 911 (emergency).</p>
       <p class="fstats">2,037 resources · 25 categories · 53 jurisdictions · Updated March 2026</p>
       <p class="foot-sources"><strong>Sources:</strong> Street Roots Rose City Resource Guide (Dec 2025–May 2026), Coalition for the Homeless NYC Street Sheet (2024), Salt Lake County 211 (2024-25), Louisville Street Tips (2025-26), Montgomery County OH Street Card (2024), Buncombe County NC Resource Sheet (2025), Sacramento County Street Sheet (2024), ShelterBridge App, Feeding America, 211.org, SAMHSA, HUD, SSA, VA, USDA, HHS, state DHS offices, and verified local nonprofits.</p>
@@ -152,7 +167,7 @@
         <span class="chat-avatar">🌹</span>
         <div>
           <div class="chat-title">Resource Assistant</div>
-          <div class="chat-subtitle">AI-powered · Free services only</div>
+          <div class="chat-subtitle">AI-powered · <span id="learnedCount">loading...</span></div>
         </div>
       </div>
       <button class="chat-close" id="chatClose" aria-label="Close chat">

@@ -96,6 +96,27 @@ async function init() {
 
   fetchResources();
   bindEvents();
+  loadLearnedCount();
+}
+
+async function loadLearnedCount() {
+  try {
+    const el = document.getElementById('learnedCount');
+    if (!el) return;
+    const res = await fetch('/api/learned');
+    const data = await res.json();
+    const total = data.total.toLocaleString();
+    const learned = data.learned;
+    if (learned > 0) {
+      el.textContent = `${total} resources · 💡 ${learned} AI-learned`;
+      el.title = `${learned} resources were auto-discovered by the AI assistant`;
+    } else {
+      el.textContent = `${total} resources · Free services only`;
+    }
+  } catch(e) {
+    const el = document.getElementById('learnedCount');
+    if (el) el.textContent = 'Free services only';
+  }
 }
 
 // ── Fetch resources from API ───────────────────────────────
@@ -520,7 +541,23 @@ async function sendMessage() {
     });
     const data = await res.json();
     removeTyping();
+
+    // Show the answer
     addMessage(data.answer || data.error || 'Sorry, something went wrong. Try again.', 'bot');
+
+    // Show source + auto-learn indicator
+    const meta = document.createElement('div');
+    meta.style.cssText = 'font-size:11px;color:#aaa;padding:2px 4px;text-align:right;font-family:Barlow Condensed,sans-serif;letter-spacing:.03em';
+    const src = data.source === 'ai' ? '✨ AI-enhanced' : '🗂️ Local database';
+    const saved = data.saved > 0 ? ` · 💡 +${data.saved} new resource${data.saved > 1 ? 's' : ''} learned` : '';
+    meta.textContent = src + saved;
+    chatMessages.appendChild(meta);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+
+    // If new resources were learned, show a brief toast
+    if (data.saved > 0) {
+      showToast(`💡 Learned ${data.saved} new resource${data.saved > 1 ? 's' : ''} from this search`);
+    }
   } catch (e) {
     removeTyping();
     addMessage('Could not reach the assistant. Check your connection and try again.', 'bot');
