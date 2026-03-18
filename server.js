@@ -252,7 +252,8 @@ const VALID_CATS = new Set([
   'Day Services/Hygiene','Domestic Violence & Sexual Assault','Youth Services',
   'Veteran Services','Immigration','Reentry Resources','Transportation','Harm Reduction',
   'Pet Care','Family & Parenting','Disability & Aging','Rental Assistance',
-  'STI & HIV Services','Libraries','Government Services'
+  'STI & HIV Services','Libraries','Government Services',
+  'Safe Parking'
 ]);
 
 function saveNewResources(newOnes) {

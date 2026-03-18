@@ -15,7 +15,8 @@ const CAT_CLS = {
   'Pet Care':'cc-pet','Family & Parenting':'cc-fam',
   'Disability & Aging':'cc-dis','Rental Assistance':'cc-rent',
   'Government Services':'cc-gov','Libraries':'cc-lib',
-  'STI & HIV Services':'cc-sti'
+  'STI & HIV Services':'cc-sti',
+  'Safe Parking':'cc-park'
 };
 const CAT_CLR = {
   'Food & Groceries':'#2e7d32','Meals':'#388e3c','Shelter':'#1565c0','Housing':'#0277bd',
@@ -351,6 +352,19 @@ function openModal(r) {
     modalActions.innerHTML += `<a href="${url}" target="_blank" rel="noopener" class="mbtn mbtn-s">
       <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M8 2c-2 0-3 2.5-3 6s1 6 3 6M8 2c2 0 3 2.5 3 6s-1 6-3 6M2 8h12" stroke="currentColor" stroke-width="1.5"/></svg>
       Website</a>`;
+  }
+  // Special button for Safe Parking category
+  if (r.category === 'Safe Parking') {
+    const lat = localStorage.getItem('rcg_lat');
+    const lng = localStorage.getItem('rcg_lng');
+    const mapUrl = lat && lng
+      ? `https://www.google.com/maps/search/${encodeURIComponent(r.name)}/@${lat},${lng},13z`
+      : `https://www.google.com/maps/search/${encodeURIComponent(r.name + ' safe parking')}`;
+    modalActions.innerHTML += `<a href="${mapUrl}" target="_blank" rel="noopener" class="mbtn mbtn-p" style="background:#1b5e20">
+      <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M8 1a5 5 0 00-5 5c0 3.5 5 9 5 9s5-5.5 5-9a5 5 0 00-5-5zm0 7a2 2 0 110-4 2 2 0 010 4z" fill="currentColor"/></svg>
+      Open in Maps</a>`;
+    modalActions.innerHTML += `<a href="/parking" target="_blank" rel="noopener" class="mbtn mbtn-s">
+      🚗 Parking Finder</a>`;
   }
   modalActions.innerHTML += `<button onclick="shareResource()" class="mbtn mbtn-share">
     <svg viewBox="0 0 16 16" fill="none"><path d="M12 4a2 2 0 11-4 0 2 2 0 014 0zm0 0l-8 4m8 4a2 2 0 11-4 0 2 2 0 014 0zm0 0L4 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
