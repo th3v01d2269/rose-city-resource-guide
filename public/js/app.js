@@ -211,7 +211,7 @@ function renderCards(items) {
       }
     }
     if (r.address) {
-      foot += `<a href="https://maps.google.com/?q=${encodeURIComponent(r.address)}" target="_blank" rel="noopener" class="cmap" onclick="event.stopPropagation()">
+      foot += `<a href="https://maps.google.com/?q=${encodeURIComponent(r.address)}" target="_blank" rel="noopener noreferrer" class="cmap" onclick="event.stopPropagation()">
         <svg viewBox="0 0 16 16" fill="none"><path d="M8 1a5 5 0 00-5 5c0 3.5 5 9 5 9s5-5.5 5-9a5 5 0 00-5-5zm0 7a2 2 0 110-4 2 2 0 010 4z" fill="currentColor"/></svg>Map</a>`;
     }
     const locText = r.state === 'National' ? '🌐 National'
@@ -343,13 +343,13 @@ function openModal(r) {
   }
   if (r.address) {
     const mapUrl = `https://maps.google.com/?q=${encodeURIComponent(r.address)}`;
-    modalActions.innerHTML += `<a href="${mapUrl}" target="_blank" rel="noopener" class="mbtn mbtn-s">
+    modalActions.innerHTML += `<a href="${mapUrl}" target="_blank" rel="noopener noreferrer" class="mbtn mbtn-s">
       <svg viewBox="0 0 16 16" fill="none"><path d="M8 1a5 5 0 00-5 5c0 3.5 5 9 5 9s5-5.5 5-9a5 5 0 00-5-5zm0 7a2 2 0 110-4 2 2 0 010 4z" fill="currentColor"/></svg>
       Directions</a>`;
   }
   if (r.website) {
     const url = r.website.startsWith('http') ? r.website : 'https://' + r.website;
-    modalActions.innerHTML += `<a href="${url}" target="_blank" rel="noopener" class="mbtn mbtn-s">
+    modalActions.innerHTML += `<a href="${url}" target="_blank" rel="noopener noreferrer" class="mbtn mbtn-s">
       <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/><path d="M8 2c-2 0-3 2.5-3 6s1 6 3 6M8 2c2 0 3 2.5 3 6s-1 6-3 6M2 8h12" stroke="currentColor" stroke-width="1.5"/></svg>
       Website</a>`;
   }
@@ -360,10 +360,10 @@ function openModal(r) {
     const mapUrl = lat && lng
       ? `https://www.google.com/maps/search/${encodeURIComponent(r.name)}/@${lat},${lng},13z`
       : `https://www.google.com/maps/search/${encodeURIComponent(r.name + ' safe parking')}`;
-    modalActions.innerHTML += `<a href="${mapUrl}" target="_blank" rel="noopener" class="mbtn mbtn-p" style="background:#1b5e20">
+    modalActions.innerHTML += `<a href="${mapUrl}" target="_blank" rel="noopener noreferrer" class="mbtn mbtn-p" style="background:#1b5e20">
       <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M8 1a5 5 0 00-5 5c0 3.5 5 9 5 9s5-5.5 5-9a5 5 0 00-5-5zm0 7a2 2 0 110-4 2 2 0 010 4z" fill="currentColor"/></svg>
       Open in Maps</a>`;
-    modalActions.innerHTML += `<a href="/parking" target="_blank" rel="noopener" class="mbtn mbtn-s">
+    modalActions.innerHTML += `<a href="/parking" target="_blank" rel="noopener noreferrer" class="mbtn mbtn-s">
       🚗 Parking Finder</a>`;
   }
   modalActions.innerHTML += `<button onclick="shareResource()" class="mbtn mbtn-share">
@@ -395,11 +395,11 @@ function openModal(r) {
 
   if (r.address) {
     const mapUrl = `https://maps.google.com/?q=${encodeURIComponent(r.address)}`;
-    body += mfld('Address', `<a href="${mapUrl}" target="_blank" rel="noopener">${esc(r.address)}</a>`);
+    body += mfld('Address', `<a href="${mapUrl}" target="_blank" rel="noopener noreferrer">${esc(r.address)}</a>`);
   }
   if (r.website) {
     const url = r.website.startsWith('http') ? r.website : 'https://' + r.website;
-    body += mfld('Website', `<a href="${url}" target="_blank" rel="noopener">${esc(r.website)}</a>`);
+    body += mfld('Website', `<a href="${url}" target="_blank" rel="noopener noreferrer">${esc(r.website)}</a>`);
   }
   modalBody.innerHTML = body;
 
@@ -530,16 +530,26 @@ function esc(s) {
 // ── Near Me — uses GPS + reverse geocode to set state/county ──────────
 async function findNearMe() {
   const btn = document.getElementById('nearMeBtn');
-  const lbl = document.getElementById('nearMeLabel');
 
   if (!navigator.geolocation) {
     showLocToast('⚠️ Location not supported on this browser');
     return;
   }
 
+  // Check if permission already granted — skip prompt if so
+  if (navigator.permissions) {
+    try {
+      const perm = await navigator.permissions.query({ name: 'geolocation' });
+      if (perm.state === 'denied') {
+        showLocToast('⚠️ Location blocked. Go to browser Settings → Site Settings → Location to allow it.');
+        return;
+      }
+    } catch(e) { /* permissions API not supported — proceed anyway */ }
+  }
+
   btn.disabled = true;
   btn.innerHTML = `<span class="nmspinner"></span><span>Locating…</span>`;
-  showLocToast('📍 Getting your location…');
+  showLocToast('📍 Getting your location — allow access if prompted…');
 
   navigator.geolocation.getCurrentPosition(
     async (pos) => {
@@ -616,11 +626,12 @@ async function findNearMe() {
       }
     },
     (err) => {
-      let msg = '⚠️ Location denied.';
-      if (err.code === 1) msg = '⚠️ Location access denied. Allow it in your browser settings.';
-      if (err.code === 2) msg = '⚠️ Could not detect location. Select state manually.';
-      if (err.code === 3) msg = '⚠️ Location timed out. Try again.';
-      showLocToast(msg);
+      const msgs = {
+        1: '⚠️ Location blocked. Go to Settings → Site Settings → Location to allow.',
+        2: '⚠️ Location unavailable. Check GPS/WiFi and try again.',
+        3: '⚠️ Location timed out. Move to an area with better signal and try again.',
+      };
+      showLocToast(msgs[err.code] || '⚠️ Could not get location. Select your state manually.');
       resetNearMeBtn();
     },
     { timeout: 12000, maximumAge: 300000, enableHighAccuracy: false }

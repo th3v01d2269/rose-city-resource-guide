@@ -6,6 +6,27 @@ const fs = require('fs');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// ── Security headers ──────────────────────────────────────────────────
+app.use((req, res, next) => {
+  res.setHeader('X-Frame-Options', 'SAMEORIGIN');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  // Allow geolocation API from our own pages; block camera/mic/payment
+  res.setHeader('Permissions-Policy',
+    'geolocation=(self), camera=(), microphone=(), payment=()'
+  );
+  res.setHeader('Content-Security-Policy', [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://fonts.googleapis.com",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com https://cdnjs.cloudflare.com",
+    "font-src 'self' https://fonts.gstatic.com",
+    "img-src 'self' data: https://*.tile.openstreetmap.org https://tile.openstreetmap.org",
+    "frame-src 'self' https://www.openstreetmap.org",
+    "connect-src 'self' https://api.anthropic.com https://api.groq.com https://nominatim.openstreetmap.org",
+  ].join('; '));
+  next();
+});
+
 app.use(compression());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public'), { maxAge: '1h', etag: true }));
