@@ -6,3 +6,7 @@ node_modules/
 
 # Keep legal name private — license distributed separately
 LICENSE
+
+# Maintenance & runtime
+data/submissions.json
+cleanup.sh
