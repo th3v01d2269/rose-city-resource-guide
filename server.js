@@ -119,10 +119,12 @@ app.post('/api/ask', async (req, res) => {
   const localAnswer = localSearch(question, state, county);
   const localResults = getTopResources(question, state, county);
 
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+  const anthropicKey = process.env.ANTHROPIC_API_KEY;
+  const groqKey = process.env.GROQ_API_KEY;
+  const hasAI = anthropicKey || groqKey;
 
-  // No API key → return local results only
-  if (!apiKey) {
+  // No AI key → return local results only
+  if (!hasAI) {
     return res.json({ answer: localAnswer, source: 'local', saved: 0 });
   }
 
@@ -134,53 +136,84 @@ app.post('/api/ask', async (req, res) => {
       ).join('\n')
     : 'No close matches in local database.';
 
-  try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 2048,
-        system: `You are a compassionate social services navigator helping find FREE community resources in the US.
+  const SYSTEM_PROMPT = `You are a compassionate social services navigator helping find FREE community resources in the US.
 
 Your response MUST be in this exact JSON format:
 {
-  "answer": "Your warm, practical response here with specific resources, phone numbers, addresses. Use \n for line breaks. Lead with 988/211/911 if crisis detected.",
+  "answer": "Your warm, practical response with specific resources, phone numbers, addresses. Use \\n for line breaks. Lead with 988/211/911 if crisis detected.",
   "new_resources": [
     {
       "name": "Program Name",
       "phone": "555-555-5555",
       "address": "123 Main St, City ST 12345",
-      "description": "What they offer, who they serve",
+      "description": "What they offer and who they serve",
       "hours": "M-F 9am-5pm",
       "website": "example.org",
       "state": "Oregon",
       "county": "Multnomah County",
       "category": "Food & Groceries",
-      "req": ["Eligibility requirement 1", "Requirement 2"]
+      "req": ["Eligibility requirement 1"]
     }
   ]
 }
 
-Categories must be one of: Food & Groceries, Meals, Shelter, Housing, Health Care, Mental Health & Recovery, Legal Services, Employment & Job Training, Benefits & Financial Aid, Clothing, Day Services/Hygiene, Domestic Violence & Sexual Assault, Youth Services, Veteran Services, Immigration, Reentry Resources, Transportation, Harm Reduction, Pet Care, Family & Parenting, Disability & Aging, Rental Assistance, STI & HIV Services, Libraries, Government Services
+Valid categories: Food & Groceries, Meals, Shelter, Housing, Health Care, Mental Health & Recovery, Legal Services, Employment & Job Training, Benefits & Financial Aid, Clothing, Day Services/Hygiene, Domestic Violence & Sexual Assault, Youth Services, Veteran Services, Immigration, Reentry Resources, Transportation, Harm Reduction, Pet Care, Family & Parenting, Disability & Aging, Rental Assistance, STI & HIV Services, Libraries, Government Services
 
-In new_resources, include ONLY real verified programs you know about that are NOT already in the local database. If you mention a program in your answer that is not in the local DB, add it to new_resources so it gets saved. If no new programs to add, use empty array [].
+In new_resources include ONLY real verified programs NOT already in the local database. If no new programs, use [].
+Be warm, specific, mobile-friendly. Include phone numbers and addresses when known.`;
 
-Be warm, specific, and mobile-friendly. Always include phone numbers and addresses when you know them.`,
-        messages: [{
-          role: 'user',
-          content: `Location: ${locCtx}\nQuestion: ${question}\n\nAlready in local database:\n${dbSummary}\n\nProvide your answer AND any additional real programs not in the database above.`
-        }]
-      })
-    });
+  const USER_MSG = `Location: ${locCtx}\nQuestion: ${question}\n\nAlready in local database:\n${dbSummary}\n\nProvide your answer AND any real programs not listed above.`;
 
-    if (!response.ok) throw new Error('API error ' + response.status);
-    const data = await response.json();
-    const rawText = data.content?.[0]?.text || '';
+  try {
+    let rawText = '';
+
+    if (groqKey) {
+      // Groq — fast, free tier available
+      const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${groqKey}`
+        },
+        body: JSON.stringify({
+          model: 'llama-3.3-70b-versatile',
+          max_tokens: 2048,
+          messages: [
+            { role: 'system', content: SYSTEM_PROMPT },
+            { role: 'user', content: USER_MSG }
+          ],
+          response_format: { type: 'json_object' }
+        })
+      });
+      if (!groqRes.ok) {
+        const err = await groqRes.text();
+        console.error('Groq error:', err);
+        throw new Error('Groq API error ' + groqRes.status);
+      }
+      const groqData = await groqRes.json();
+      rawText = groqData.choices?.[0]?.message?.content || '';
+      console.log('✨ Groq response received');
+    } else if (anthropicKey) {
+      // Anthropic Claude fallback
+      const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': anthropicKey,
+          'anthropic-version': '2023-06-01'
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-6',
+          max_tokens: 2048,
+          system: SYSTEM_PROMPT,
+          messages: [{ role: 'user', content: USER_MSG }]
+        })
+      });
+      if (!anthropicRes.ok) throw new Error('Anthropic API error ' + anthropicRes.status);
+      const anthropicData = await anthropicRes.json();
+      rawText = anthropicData.content?.[0]?.text || '';
+      console.log('✨ Anthropic Claude response received');
+    }
 
     // 3. Parse AI response
     let answer = localAnswer;
@@ -382,6 +415,11 @@ app.get('*', (req, res) =>
 app.listen(PORT, () => {
   console.log(`\n🌹 US Community Resource Guide`);
   console.log(`   ${resources.length.toLocaleString()} resources loaded`);
-  console.log(`   AI assistant: ${process.env.ANTHROPIC_API_KEY ? '✅ configured' : '⚠️  set ANTHROPIC_API_KEY to enable'}`);
+  const aiStatus = process.env.GROQ_API_KEY
+    ? '✅ Groq active' + (process.env.ANTHROPIC_API_KEY ? ' + Anthropic' : '')
+    : process.env.ANTHROPIC_API_KEY
+      ? '✅ Anthropic active'
+      : '⚠️  set GROQ_API_KEY or ANTHROPIC_API_KEY to enable AI';
+  console.log(`   AI assistant: ${aiStatus}`);
   console.log(`   http://localhost:${PORT}\n`);
 });

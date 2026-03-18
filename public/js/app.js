@@ -426,6 +426,8 @@ function resetAll() {
   countyFilter.disabled = true;
   countyFilter.innerHTML = '<option value="">All Counties / Regions</option>';
   S.query = ''; S.state = ''; S.county = ''; S.category = '';
+  localStorage.setItem('rcg_state', '');
+  localStorage.setItem('rcg_county', '');
   S.page = 1; syncPills(); fetchResources(); searchInput.focus();
 }
 
@@ -446,13 +448,17 @@ function bindEvents() {
 
   stateFilter.addEventListener('change', () => {
     S.state = stateFilter.value; S.county = ''; S.page = 1;
+    localStorage.setItem('rcg_state', S.state);
+    localStorage.setItem('rcg_county', '');
     populateCounties(stateFilter.value);
     countyFilter.value = '';
     fetchResources();
   });
 
   countyFilter.addEventListener('change', () => {
-    S.county = countyFilter.value; S.page = 1; fetchResources();
+    S.county = countyFilter.value; S.page = 1;
+    localStorage.setItem('rcg_county', S.county);
+    fetchResources();
   });
 
   categoryFilter.addEventListener('change', () => {
