@@ -62,7 +62,12 @@ function buildMeta() {
           (b === 'National' || b === 'Statewide') ? 1 : a.localeCompare(b))
       })),
     categories: Object.entries(catMap)
-      .sort(([a], [b]) => a.localeCompare(b))
+      .sort(([a], [b]) => {
+        // Pin Safe Parking to top of list
+        if (a === 'Safe Parking') return -1;
+        if (b === 'Safe Parking') return 1;
+        return a.localeCompare(b);
+      })
       .map(([name, count]) => ({ name, count }))
   };
 }
@@ -178,7 +183,7 @@ Your response MUST be in this exact JSON format:
   ]
 }
 
-Valid categories: Food & Groceries, Meals, Shelter, Housing, Health Care, Mental Health & Recovery, Legal Services, Employment & Job Training, Benefits & Financial Aid, Clothing, Day Services/Hygiene, Domestic Violence & Sexual Assault, Youth Services, Veteran Services, Immigration, Reentry Resources, Transportation, Harm Reduction, Pet Care, Family & Parenting, Disability & Aging, Rental Assistance, STI & HIV Services, Libraries, Government Services
+Valid categories: Food & Groceries, Meals, Shelter, Housing, Health Care, Mental Health & Recovery, Legal Services, Employment & Job Training, Benefits & Financial Aid, Clothing, Day Services/Hygiene, Domestic Violence & Sexual Assault, Youth Services, Veteran Services, Immigration, Reentry Resources, Transportation, Harm Reduction, Pet Care, Family & Parenting, Disability & Aging, Rental Assistance, STI & HIV Services, Libraries, Government Services, Safe Parking
 
 In new_resources include ONLY real verified programs NOT already in the local database. If no new programs, use [].
 Be warm, specific, mobile-friendly. Include phone numbers and addresses when known.`;

@@ -91,13 +91,26 @@ async function init() {
     // Category filter + pills
     for (const { name } of meta.categories) {
       const opt = document.createElement('option');
-      opt.value = name; opt.textContent = name;
+      opt.value = name;
+      // Add parking icon to Safe Parking in dropdown
+      opt.textContent = name === 'Safe Parking' ? '🚗 Safe Parking' : name;
       categoryFilter.appendChild(opt);
 
       const pill = document.createElement('button');
-      pill.className = 'pill'; pill.textContent = name; pill.dataset.cat = name;
-      pill.addEventListener('click', () => togglePill(pill, name));
-      pillTrack.appendChild(pill);
+      if (name === 'Safe Parking') {
+        // Special green pill for parking — always first
+        pill.className = 'pill pill-parking';
+        pill.innerHTML = '🚗 Safe Parking';
+        pill.dataset.cat = name;
+        pill.addEventListener('click', () => togglePill(pill, name));
+        pillTrack.prepend(pill);
+      } else {
+        pill.className = 'pill';
+        pill.textContent = name;
+        pill.dataset.cat = name;
+        pill.addEventListener('click', () => togglePill(pill, name));
+        pillTrack.appendChild(pill);
+      }
     }
 
     // Restore saved state
@@ -114,6 +127,7 @@ async function init() {
       S.category = savedCat;
       categoryFilter.value = savedCat;
       syncPills();
+      if (savedCat === 'Safe Parking') updateParkingBanner();
     }
     if (savedQuery) {
       S.query = savedQuery;
@@ -126,6 +140,35 @@ async function init() {
   bindEvents();
   loadLearnedCount();
   restoreNearMeState();
+}
+
+// Show/hide parking map banner based on active category
+function updateParkingBanner() {
+  const existing = document.getElementById('parkingBanner');
+  if (S.category === 'Safe Parking') {
+    if (!existing) {
+      const banner = document.createElement('div');
+      banner.id = 'parkingBanner';
+      banner.style.cssText = `
+        background:#1b5e20;padding:10px 14px;text-align:center;
+        border-bottom:2px solid #145214;
+      `;
+      banner.innerHTML = `
+        <a href="/parking" target="_blank" rel="noopener noreferrer"
+           style="color:#fff;text-decoration:none;font-family:'Barlow Condensed',sans-serif;
+                  font-size:14px;font-weight:700;letter-spacing:.04em;
+                  display:inline-flex;align-items:center;gap:8px">
+          🗺️ Open Interactive Parking Map
+          <span style="background:rgba(255,255,255,.2);padding:2px 10px;border-radius:10px;font-size:12px">Find Near Me →</span>
+        </a>
+      `;
+      // Insert above the grid
+      const main = document.getElementById('mainContent');
+      if (main) main.insertBefore(banner, main.firstChild);
+    }
+  } else if (existing) {
+    existing.remove();
+  }
 }
 
 async function loadLearnedCount() {
@@ -453,7 +496,8 @@ function populateCounties(stateName) {
 function togglePill(btn, name) {
   S.category = S.category === name ? '' : name;
   categoryFilter.value = S.category;
-  syncPills(); S.page = 1; fetchResources();
+  localStorage.setItem('rcg_cat', S.category);
+  syncPills(); updateParkingBanner(); S.page = 1; fetchResources();
 }
 
 function syncPills() {
@@ -472,7 +516,7 @@ function resetAll() {
   localStorage.setItem('rcg_county', '');
   localStorage.setItem('rcg_cat', '');
   localStorage.setItem('rcg_query', '');
-  S.page = 1; syncPills(); fetchResources(); searchInput.focus();
+  S.page = 1; syncPills(); updateParkingBanner(); fetchResources(); searchInput.focus();
 }
 
 function bindEvents() {
@@ -511,7 +555,7 @@ function bindEvents() {
   categoryFilter.addEventListener('change', () => {
     S.category = categoryFilter.value;
     localStorage.setItem('rcg_cat', S.category);
-    S.page = 1; syncPills(); fetchResources();
+    S.page = 1; syncPills(); updateParkingBanner(); fetchResources();
   });
 
   filterReset.addEventListener('click', resetAll);
