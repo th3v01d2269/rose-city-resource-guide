@@ -53,20 +53,12 @@ app.use((req, res, next) => {
   );
   res.setHeader('Content-Security-Policy', [
     "default-src 'self'",
-    // Scripts: self + inline + MapLibre GL CDN + fonts
-    "script-src 'self' 'unsafe-inline' https://unpkg.com https://cdnjs.cloudflare.com https://fonts.googleapis.com",
-    // Styles: self + inline + MapLibre CSS + fonts
-    "style-src 'self' 'unsafe-inline' https://unpkg.com https://fonts.googleapis.com https://fonts.gstatic.com https://cdnjs.cloudflare.com",
-    // Fonts
-    "font-src 'self' data: https://fonts.gstatic.com https://unpkg.com",
-    // Images: tiles from OpenFreeMap + OSM + data URIs + blobs (MapLibre sprites)
-    "img-src 'self' data: blob: https://*.openstreetmap.org https://tiles.openfreemap.org https://unpkg.com",
-    // Workers: MapLibre GL uses web workers loaded as blobs
-    "worker-src blob:",
-    // Frames: only self (no more Google Maps iframe needed)
-    "frame-src 'self'",
-    // API calls: AI providers + OpenFreeMap tiles + Nominatim geocoding
-    "connect-src 'self' https://api.anthropic.com https://api.groq.com https://nominatim.openstreetmap.org https://tiles.openfreemap.org",
+    "script-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://fonts.gstatic.com",
+    "font-src 'self' https://fonts.gstatic.com",
+    "img-src 'self' data: blob: https://tile.openstreetmap.org https://a.tile.openstreetmap.org https://b.tile.openstreetmap.org https://c.tile.openstreetmap.org https://maps.wikimedia.org",
+    "frame-src 'self' https://www.openstreetmap.org",
+    "connect-src 'self' https://api.anthropic.com https://api.groq.com https://nominatim.openstreetmap.org https://tile.openstreetmap.org https://a.tile.openstreetmap.org https://b.tile.openstreetmap.org",
   ].join('; '));
   next();
 });

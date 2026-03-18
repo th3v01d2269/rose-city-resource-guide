@@ -438,7 +438,21 @@ function openModal(r) {
 
   if (r.address) {
     const mapUrl = `https://maps.google.com/?q=${encodeURIComponent(r.address)}`;
-    body += mfld('Address', `<a href="${mapUrl}" target="_blank" rel="noopener noreferrer">${esc(r.address)}</a>`);
+    const osmUrl = `https://www.openstreetmap.org/search?query=${encodeURIComponent(r.address)}`;
+    body += `<div class="mfld">
+      <div class="mflbl">Address</div>
+      <div class="mfval">${esc(r.address)}</div>
+      <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
+        <a href="${mapUrl}" target="_blank" rel="noopener noreferrer"
+           style="display:inline-flex;align-items:center;gap:4px;font-family:var(--fd);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:5px 11px;border-radius:4px;background:var(--rust);color:#fff;text-decoration:none">
+          🗺️ Google Maps
+        </a>
+        <a href="${osmUrl}" target="_blank" rel="noopener noreferrer"
+           style="display:inline-flex;align-items:center;gap:4px;font-family:var(--fd);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:5px 11px;border-radius:4px;background:var(--off);border:1.5px solid var(--bdr);color:var(--coal);text-decoration:none">
+          🌍 OpenStreetMap
+        </a>
+      </div>
+    </div>`;
   }
   if (r.website) {
     const url = r.website.startsWith('http') ? r.website : 'https://' + r.website;
