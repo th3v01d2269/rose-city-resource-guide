@@ -1,49 +1,25 @@
-// database.js with better-sqlite3
-const Database = require('better-sqlite3');
-const path = require('path');
-const fs = require('fs');
+// database.js - PostgreSQL version
+const { Pool } = require('pg');
 
-const dbPath = path.join(__dirname, 'data', 'resources.db');
-const db = new Database(dbPath);
+let pool;
 
-db.exec(`
-  CREATE TABLE IF NOT EXISTS resources (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name TEXT NOT NULL,
-    phone TEXT,
-    address TEXT,
-    description TEXT,
-    hours TEXT,
-    website TEXT,
-    state TEXT,
-    county TEXT,
-    category TEXT,
-    req TEXT
-  )
-`);
-
-const count = db.prepare("SELECT COUNT(*) as count FROM resources").get();
-if (count.count === 0) {
-  const seedData = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'resources.json'), 'utf8'));
-  const insert = db.prepare(`
-    INSERT INTO resources (name, phone, address, description, hours, website, state, county, category, req)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-  `);
-  for (const r of seedData) {
-    insert.run(
-      r.name,
-      r.phone || null,
-      r.address || null,
-      r.description || null,
-      r.hours || null,
-      r.website || null,
-      r.state || null,
-      r.county || null,
-      r.category || null,
-      JSON.stringify(r.req || [])
-    );
-  }
-  console.log(`Seeded database with ${seedData.length} resources.`);
+if (!process.env.DATABASE_URL) {
+    console.error('❌ DATABASE_URL environment variable is not set.');
+    process.exit(1);
 }
 
-module.exports = db;
+pool = new Pool({
+    connectionString: process.env.DATABASE_URL,
+    ssl: { rejectUnauthorized: false } // Required for Render PostgreSQL
+});
+
+// Test connection
+pool.query('SELECT NOW()', (err, res) => {
+    if (err) {
+        console.error('❌ Database connection failed:', err);
+    } else {
+        console.log('✅ Connected to PostgreSQL at', res.rows[0].now);
+    }
+});
+
+module.exports = pool;
