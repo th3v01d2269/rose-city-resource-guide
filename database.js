@@ -1,25 +1,29 @@
-// database.js - PostgreSQL version
+// database.js — PostgreSQL connection pool
+require('dotenv').config();
 const { Pool } = require('pg');
 
-let pool;
-
 if (!process.env.DATABASE_URL) {
-    console.error('❌ DATABASE_URL environment variable is not set.');
-    process.exit(1);
+    console.error('❌ DATABASE_URL not set — check .env');
 }
 
-pool = new Pool({
+const isLocal = (process.env.DATABASE_URL || '').includes('localhost');
+
+const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
-    ssl: { rejectUnauthorized: false } // Required for Render PostgreSQL
+    ssl: isLocal ? false : { rejectUnauthorized: false },
+    max: 20,
+    idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 5000,
 });
 
-// Test connection
-pool.query('SELECT NOW()', (err, res) => {
-    if (err) {
-        console.error('❌ Database connection failed:', err);
-    } else {
-        console.log('✅ Connected to PostgreSQL at', res.rows[0].now);
-    }
-});
+pool.on('error', err => console.error('DB pool error:', err.message));
 
-module.exports = pool;
+pool.query('SELECT NOW()')
+    .then(r => console.log('✅ PostgreSQL connected at', r.rows[0].now))
+    .catch(err => console.error('❌ DB connection failed:', err.message));
+
+module.exports = {
+    query: (text, params) => pool.query(text, params),
+    getClient: () => pool.connect(),
+    pool,
+};

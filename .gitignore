@@ -1,12 +1,5 @@
+.env
 node_modules/
-.env
-.DS_Store
+backups/
 *.log
-.env
-
-# Keep legal name private — license distributed separately
-LICENSE
-
-# Maintenance & runtime
-data/submissions.json
-cleanup.sh
+.DS_Store

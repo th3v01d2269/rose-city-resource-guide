@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<!-- COPYRIGHT NOTICE -->
+<!-- © 2026 US Community Resource Guide -->
+<!-- Licensed under CC BY-NC 4.0. Commercial use requires written permission. -->
+<!-- https://rose-city-resource-guide.onrender.com/support -->
+
+  <meta charset="UTF-8">
+  <meta name="license" content="https://creativecommons.org/licenses/by-nc/4.0/">
+  
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#1a1a1a">
+  <meta name="description" content="2,037 free community resources across all 50 states — food, shelter, health, legal aid, crisis lines, veterans, immigrants, disabilities, and more.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>US Community Resource Guide — 2,037 Free Services</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+  /* Near Me button */
+  .near-me-btn {
+    display: flex; align-items: center; gap: 5px;
+    font-family: var(--fd); font-size: 12px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .04em;
+    background: var(--rust); color: #fff; border: none;
+    border-radius: var(--r); padding: 7px 12px; cursor: pointer;
+    transition: all .15s; white-space: nowrap; margin-top: 7px;
+    width: 100%;
+    justify-content: center;
+  }
+  .near-me-btn:hover { background: var(--rust-d); }
+  .near-me-btn:disabled { background: #555; cursor: default; }
+  .near-me-btn.active { background: #1b5e20; }
+  .near-me-btn svg { flex-shrink: 0; }
+  .loc-toast {
+    position: fixed; top: 80px; left: 50%; transform: translateX(-50%);
+    background: var(--coal); color: #fff;
+    font-family: var(--fd); font-size: 13px; font-weight: 600;
+    padding: 10px 20px; border-radius: 20px; z-index: 9999;
+    box-shadow: 0 4px 16px rgba(0,0,0,.3);
+    animation: slideDown .25s ease;
+    pointer-events: none;
+  }
+  @keyframes slideDown { from { opacity:0; transform:translateX(-50%) translateY(-8px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
+  </style>
+</head>
+<body>
+
+  <!-- EMERGENCY BAR -->
+  <div class="ebar">
+    <div class="ebar-i">
+      <span class="elabel">CRISIS</span>
+      <a href="tel:988" class="elink">988 Mental Health</a>
+      <span class="sep">·</span>
+      <a href="tel:741741" class="elink">Text HOME→741741</a>
+      <span class="sep">·</span>
+      <a href="tel:211" class="elink">211 Resources</a>
+      <span class="sep">·</span>
+      <a href="tel:18007997233" class="elink">DV 1-800-799-7233</a>
+      <span class="sep">·</span>
+      <a href="tel:18774243838" class="elink">Veterans 1-877-424-3838</a>
+      <span class="sep">·</span>
+      <a href="tel:18006624357" class="elink">SAMHSA 1-800-662-4357</a>
+      <span class="sep">·</span>
+      <a href="tel:911" class="elink">911 Emergency</a>
+    </div>
+  </div>
+
+  <!-- HEADER -->
+  <header class="hdr">
+    <div class="hdr-i">
+      <div class="hdr-brand">
+        <svg class="rose" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <path d="M16 4C10 4 6 8 6 13c0 7 10 15 10 15s10-8 10-15c0-5-4-9-10-9z" fill="#e8442a"/>
+          <path d="M16 10c-3 0-5 2-5 4.5C11 17.5 16 22 16 22s5-4.5 5-7.5C21 12 19 10 16 10z" fill="#c23220"/>
+          <path d="M16 4v6M13 6l3 4M19 6l-3 4" stroke="#c23220" stroke-width="1.5" stroke-linecap="round"/>
+        </svg>
+        <div>
+          <h1 class="htitle">US Community<br><span>Resource Guide</span></h1>
+        </div>
+      </div>
+      <div class="hmeta">
+        <span class="hcount" id="hcount">2,088</span>
+        <span class="htag">All 50 States · Free Services</span>
+        <a href="/support" target="_blank" rel="noopener noreferrer"
+           style="display:inline-flex;align-items:center;gap:5px;background:var(--rust);color:#fff;font-family:var(--fd);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;padding:5px 12px;border-radius:4px;text-decoration:none;margin-top:4px;transition:background .15s"
+           onmouseover="this.style.background='#c23220'" onmouseout="this.style.background='var(--rust)'">
+          ❤️ Support
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- SEARCH & FILTERS -->
+  <div class="srch" role="search">
+    <div class="srch-i">
+      <div class="sbar">
+        <svg class="sico" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+          <circle cx="8.5" cy="8.5" r="5.5" stroke="currentColor" stroke-width="2"/>
+          <path d="M13 13L17 17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        </svg>
+        <input type="search" id="searchInput" class="sinput"
+          placeholder="Search name, service, keyword, city…"
+          autocomplete="off" autocorrect="off" spellcheck="false"
+          aria-label="Search resources">
+        <button class="sclear" id="searchClear" aria-label="Clear search" hidden>
+          <svg viewBox="0 0 16 16" fill="none"><path d="M4 4L12 12M12 4L4 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+        </button>
+      </div>
+      <button class="near-me-btn" id="nearMeBtn" onclick="findNearMe()" title="Use my location">
+        <svg viewBox="0 0 20 20" fill="none" width="15" height="15">
+          <circle cx="10" cy="10" r="3" fill="currentColor"/>
+          <path d="M10 2v2.5M10 15.5V18M2 10h2.5M15.5 10H18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/>
+        </svg>
+        <span id="nearMeLabel">Near Me</span>
+      </button>
+      <div class="frow">
+        <div class="fg">
+          <label class="flbl" for="stateFilter">State</label>
+          <select id="stateFilter" class="fsel"><option value="">All States</option></select>
+        </div>
+        <div class="fg">
+          <label class="flbl" for="countyFilter">County / Region</label>
+          <select id="countyFilter" class="fsel" disabled><option value="">All Counties</option></select>
+        </div>
+        <div class="fg fg-cat">
+          <label class="flbl" for="categoryFilter">Category</label>
+          <select id="categoryFilter" class="fsel"><option value="">All Categories</option></select>
+        </div>
+        <button class="freset" id="filterReset">Reset</button>
+      </div>
+      <div class="rsum-wrap" id="rsumWrap" style="display:none">
+        <span class="rsum" id="resultsSummary"></span>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- PARKING FINDER BANNER -->
+  <div style="background:#1b5e20;border-bottom:2px solid #145214">
+    <div style="max-width:1160px;margin:0 auto;padding:0 14px">
+      <a href="/parking" target="_blank" rel="noopener noreferrer" style="display:flex;align-items:center;justify-content:space-between;padding:12px 0;text-decoration:none;gap:12px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <span style="font-size:26px">🚗</span>
+          <div>
+            <div style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;color:#fff">Safe Overnight Parking Finder</div>
+            <div style="font-size:12px;color:rgba(255,255,255,.75);margin-top:1px">Find Walmarts, rest areas, truck stops, and verified safe parking programs near you</div>
+          </div>
+        </div>
+        <div style="background:rgba(255,255,255,.2);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;padding:8px 14px;border-radius:6px;white-space:nowrap;flex-shrink:0">
+          Open Map →
+        </div>
+      </a>
+    </div>
+  </div>
+
+  <!-- CATEGORY PILLS -->
+  <div class="pills" role="navigation" aria-label="Category quick filter">
+    <div class="pill-track" id="pillTrack"></div>
+  </div>
+
+  <!-- MAIN CONTENT -->
+  <main class="main" id="mainContent">
+    <div class="grid" id="cardsGrid" role="list" aria-live="polite" aria-label="Resource listings"></div>
+    <div class="pager" id="pagination" role="navigation" aria-label="Page navigation"></div>
+    <div class="page-info" id="pageInfo" style="display:none"></div>
+    <div class="empty" id="emptyState" style="display:none">
+      <div class="eico">🔍</div>
+      <p>No resources found.<br>Try different keywords or reset filters.</p>
+    </div>
+    <div class="loading" id="loadingState"><div class="spinner"></div></div>
+  </main>
+
+  <!-- MODAL -->
+  <div id="modalOverlay" style="display:none" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal" id="modal">
+      <button class="mclose" id="modalClose" aria-label="Close">
+        <svg viewBox="0 0 16 16" fill="none"><path d="M3 3L13 13M13 3L3 13" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>
+      </button>
+      <div class="mbadge" id="modalBadge"></div>
+      <h2 class="mtitle" id="modalTitle"></h2>
+      <div class="mloc" id="modalLoc"></div>
+      <div class="macts" id="modalActions"></div>
+      <div id="modalHours"></div>
+      <div class="mbody" id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- TOAST -->
+  <div class="toast" id="toast" style="display:none"></div>
+
+  <!-- FOOTER -->
+  <footer class="foot">
+    <div class="foot-i">
+      <p><strong>US Community Resource Guide</strong> — 2,088 verified free resources across all 50 states, DC, and Puerto Rico. The most comprehensive social services directory available.</p>
+      <p style="margin-bottom:8px">
+        <a href="/parking" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;background:#1b5e20;color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:8px 16px;border-radius:6px;text-decoration:none">
+          🚗 Safe Overnight Parking Finder
+        </a>
+      </p>
+      <p style="margin-bottom:8px">
+        <a href="/submit" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;background:#333;color:#ccc;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:8px 16px;border-radius:6px;text-decoration:none;border:1px solid #555">
+          ➕ Submit a Resource
+        </a>
+      </p>
+      <p style="margin-bottom:8px;display:flex;gap:8px;flex-wrap:wrap">
+        <a href="/support" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;background:var(--rust);color:#fff;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:8px 16px;border-radius:6px;text-decoration:none">
+          ❤️ Donate — Keep This Free
+        </a>
+        <a href="/support#grants" target="_blank" rel="noopener noreferrer" style="display:inline-flex;align-items:center;gap:6px;background:#333;color:#ccc;font-family:'Barlow Condensed',sans-serif;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;padding:8px 16px;border-radius:6px;text-decoration:none;border:1px solid #555">
+          📋 Grant Opportunities
+        </a>
+      </p>
+      <p class="fnote">Always call ahead — hours, eligibility, and availability change. In a crisis: call 988 (mental health), 211 (local resources), or 911 (emergency).</p>
+      <p class="fstats">2,088 resources · 25 categories · 53 jurisdictions · Updated March 2026</p>
+      <p style="margin-top:10px;padding-top:10px;border-top:1px solid #333;font-size:11px;color:#555">
+        © 2026 US Community Resource Guide · 
+        <a href="/support" target="_blank" rel="noopener noreferrer" style="color:#666;text-decoration:none">US Community Resource Guide</a> · 
+        Licensed under <a href="https://creativecommons.org/licenses/by-nc/4.0/" target="_blank" rel="noopener noreferrer" style="color:#666;text-decoration:none">CC BY-NC 4.0</a> · 
+        Commercial use requires <a href="mailto:th3v01d2269@gmail.com" style="color:#666;text-decoration:none">written permission</a>
+      </p>
+      <p class="foot-sources"><strong>Sources:</strong> Street Roots Rose City Resource Guide (Dec 2025–May 2026), Coalition for the Homeless NYC Street Sheet (2024), Salt Lake County 211 (2024-25), Louisville Street Tips (2025-26), Montgomery County OH Street Card (2024), Buncombe County NC Resource Sheet (2025), Sacramento County Street Sheet (2024), ShelterBridge App, Feeding America, 211.org, SAMHSA, HUD, SSA, VA, USDA, HHS, state DHS offices, and verified local nonprofits.</p>
+    </div>
+  </footer>
+
+
+  <!-- AI ASSISTANT CHAT BUTTON -->
+  <button class="chat-fab" id="chatFab" aria-label="Ask AI assistant">
+    <svg viewBox="0 0 24 24" fill="none" width="26" height="26">
+      <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+      <path d="M8 10h8M8 14h5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+    </svg>
+  </button>
+
+  <!-- AI CHAT PANEL -->
+  <div class="chat-panel" id="chatPanel" style="display:none" role="dialog" aria-label="AI Resource Assistant">
+    <div class="chat-header">
+      <div class="chat-header-info">
+        <span class="chat-avatar">🌹</span>
+        <div>
+          <div class="chat-title">Resource Assistant</div>
+          <div class="chat-subtitle">AI-powered · <span id="learnedCount">loading...</span></div>
+        </div>
+      </div>
+      <button class="chat-close" id="chatClose" aria-label="Close chat">
+        <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-msg chat-msg-bot">
+        <div class="chat-bubble">Hi! I can help you find free resources. Describe your situation — food, shelter, health, legal help, or anything else — and I'll point you to the right programs.<br><br>What do you need help with?</div>
+      </div>
+    </div>
+    <div class="chat-input-row">
+      <input type="text" id="chatInput" class="chat-input" placeholder="Describe what you need…" autocomplete="off" maxlength="500">
+      <button class="chat-send" id="chatSend" aria-label="Send">
+        <svg viewBox="0 0 16 16" fill="none" width="16" height="16"><path d="M2 8l12-6-5 6 5 6z" fill="currentColor"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>
