@@ -192,112 +192,218 @@ app.get('/api/learned', ah(async (req, res) => {
 
 // ── POST /api/ask ────────────────────────────────────────────
 // AI chat: local DB first → Groq → Claude → fallback
-app.post('/api/ask', rateLimit({ windowMs: 60000, max: 25 }), ah(async (req, res) => {
-    const { question, state, county } = req.body;
-    if (!question?.trim()) return res.status(400).json({ error: 'Question required' });
 
-    const q = question.trim().substring(0, 300);
-
-    // 1. Local DB search (free, instant)
-    const params = [`%${q}%`]; let idx = 2;
-    let sql = `SELECT * FROM resources
-               WHERE (name ILIKE $1 OR description ILIKE $1 OR category ILIKE $1)`;
-    if (state)  { sql += ` AND state=$${idx}`;  params.push(state);  idx++; }
-    if (county) { sql += ` AND county=$${idx}`; params.push(county); idx++; }
-    sql += ' ORDER BY name LIMIT 5';
-
-    const local = await db.query(sql, params);
-    if (local.rows.length > 0) {
-        const answer = local.rows.map((r, i) =>
-            `${i+1}. ${r.name}` +
-            (r.phone   ? ` — ${r.phone}` : '') +
-            (r.address ? `\n   📍 ${r.address}` : '') +
-            (r.hours   ? `\n   🕐 ${r.hours}` : '') +
-            (r.website ? `\n   🌐 ${r.website.startsWith('http') ? r.website : 'https://'+r.website}` : '')
-        ).join('\n\n');
-        return res.json({ answer, source: 'local', saved: 0 });
-    }
-
-    // 2. Groq — free llama3 (fast)
-    if (process.env.GROQ_API_KEY) {
-        try {
-            const groqRes = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${process.env.GROQ_API_KEY}`
-                },
-                body: JSON.stringify({
-                    model: 'llama3-8b-8192',
-                    messages: [
-                        { role: 'system', content: 'You are a social services assistant. Give brief, specific answers about free community resources. Include phone numbers when known. Use numbered list format.' },
-                        { role: 'user', content: `Free resources for: "${q}"${state ? ' in ' + state : ''}${county ? ', ' + county : ''}. Under 150 words.` }
-                    ],
-                    max_tokens: 250
-                })
-            });
-            const data = await groqRes.json();
-            const answer = data.choices?.[0]?.message?.content
-                || 'No results. Try calling 211 or visiting 211.org.';
-            return res.json({ answer, source: 'ai', saved: 0 });
-        } catch(e) { console.error('Groq error:', e.message); }
-    }
-
-    // 3. Claude — Anthropic fallback
-    if (process.env.ANTHROPIC_API_KEY) {
-        try {
-            const claudeRes = await fetch('https://api.anthropic.com/v1/messages', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'x-api-key': process.env.ANTHROPIC_API_KEY,
-                    'anthropic-version': '2023-06-01'
-                },
-                body: JSON.stringify({
-                    model: 'claude-haiku-4-5-20251001',
-                    max_tokens: 300,
-                    messages: [{
-                        role: 'user',
-                        content: `Free community resources for: "${q}"${state ? ' in ' + state : ''}${county ? ', ' + county : ''}. List specific orgs with phone numbers. Under 150 words.`
-                    }]
-                })
-            });
-            const data = await claudeRes.json();
-            const answer = data.content?.[0]?.text
-                || 'No results. Try calling 211 or visiting 211.org.';
-            return res.json({ answer, source: 'ai', saved: 0 });
-        } catch(e) { console.error('Claude error:', e.message); }
-    }
-
-    // 4. Plain fallback
-    res.json({
-        answer: `No results for "${q}"${state ? ' in ' + state : ''}.\n\n• Call 211 (free local resource hotline)\n• Visit 211.org\n• Search 988 for mental health crisis`,
-        source: 'local', saved: 0
+// ── DeepSeek API ──────────────────────────────────────────────────
+async function callDeepSeek(userMsg, systemPrompt) {
+    const res = await fetch('https://api.deepseek.com/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.DEEPSEEK_API_KEY}`
+        },
+        body: JSON.stringify({
+            model: 'deepseek-chat',
+            messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user',   content: userMsg }
+            ],
+            max_tokens: 2048,
+            response_format: { type: 'json_object' }
+        })
     });
-}));
+    if (!res.ok) throw new Error(`DeepSeek API error: ${res.status}`);
+    const data = await res.json();
+    return data.choices[0].message.content;
+}
 
-// ── GET /health ──────────────────────────────────────────────
-app.get('/health', async (req, res) => {
-    try {
-        const r = await db.query('SELECT COUNT(*) as total FROM resources');
-        res.json({ status: 'healthy', resources: parseInt(r.rows[0].total), ts: new Date().toISOString() });
-    } catch(err) {
-        res.status(503).json({ status: 'unhealthy', error: err.message });
-    }
-});
-
-// ── Catch-all → index.html ───────────────────────────────────
-app.get('*', (req, res) =>
-    res.sendFile(path.join(__dirname, 'public', 'index.html'))
-);
-
-// ── Error handler ────────────────────────────────────────────
-app.use((err, req, res, next) => {
-    console.error('Error:', err.message);
-    res.status(err.status || 500).json({
-        error: IS_PROD ? 'Internal server error' : err.message
+// ── Moonshot (Kimi) API ─────────────────────────────────────────────
+async function callMoonshot(userMsg, systemPrompt) {
+    const res = await fetch('https://api.moonshot.cn/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${process.env.MOONSHOT_API_KEY}`
+        },
+        body: JSON.stringify({
+            model: 'moonshot-v1-8k',
+            messages: [
+                { role: 'system', content: systemPrompt },
+                { role: 'user',   content: userMsg }
+            ],
+            max_tokens: 2048,
+            temperature: 0.7
+        })
     });
-});
+    if (!res.ok) throw new Error(`Moonshot API error: ${res.status}`);
+    const data = await res.json();
+    return data.choices[0].message.content;
+}
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`🌹 Server running on port ${PORT}`));
+// ── Web Search (SerpAPI) ─────────────────────────────────────────────
+async function searchWeb(query) {
+  if (!process.env.SERPAPI_KEY) return [];
+  const url = `https://serpapi.com/search?q=${encodeURIComponent(query)}&api_key=${process.env.SERPAPI_KEY}&num=5`;
+  try {
+    const res = await fetch(url);
+    const data = await res.json();
+    return (data.organic_results || []).map(r => ({
+      title: r.title,
+      description: r.snippet,
+      url: r.link
+    }));
+  } catch(e) {
+    log('WARN', 'Web search failed', { message: e.message });
+    return [];
+  }
+}
+
+// ── API: AI Assistant ──────────────────────────────────────────────────
+app.post('/api/ask', async (req, res) => {
+    const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || 'unknown';
+    if (rateLimit(ip, 30)) {
+        return res.status(429).json({ error: 'Too many requests. Please wait a moment.', source: 'local', saved: 0 });
+    }
+    const rawQ = req.body.question || '';
+    const state = String(req.body.state || '').trim().substring(0, 50);
+    const county = String(req.body.county || '').trim().substring(0, 60);
+    const question = String(rawQ).trim().substring(0, 500);
+    if (!question) return res.status(400).json({ error: 'No question provided' });
+    log('INFO', 'AI question received', { q: question.substring(0, 80), state: state || 'any' });
+
+    // 1. Always run local search first — instant, no API needed
+    const localAnswer = localSearch(question, state, county);
+    const localResults = getTopResources(question, state, county);
+
+    const anthropicKey = process.env.ANTHROPIC_API_KEY;
+    const groqKey = process.env.GROQ_API_KEY;
+    const hasAI = anthropicKey || groqKey || process.env.DEEPSEEK_API_KEY || process.env.MOONSHOT_API_KEY;
+
+    if (!hasAI) {
+        return res.json({ answer: localAnswer, source: 'local', saved: 0 });
+    }
+
+    // 2. Build context from local DB for AI to supplement
+    const locCtx = county ? `${county}, ${state}` : (state || 'anywhere in the US');
+    const dbSummary = localResults.length
+        ? localResults.slice(0,12).map(r =>
+            `• ${r.name} (${r.category}${r.county?', '+r.county:''})${r.phone?' — '+r.phone:''}${r.address?' — '+r.address:''}${r.hours?' — '+r.hours:''}`
+          ).join('\n')
+        : 'No close matches in local database.';
+
+    // 3. Web search (SerpAPI)
+    let webResults = [];
+    if (process.env.SERPAPI_KEY) {
+        try {
+            webResults = await searchWeb(question);
+            if (webResults.length) {
+                log('INFO', 'Web search found results', { count: webResults.length });
+            }
+        } catch(e) { log('WARN', 'Web search failed', { message: e.message }); }
+    }
+    const webSummary = webResults.length
+        ? '\n\nWeb search results:\n' + webResults.map(r => `- ${r.title}: ${r.description}\n  ${r.url}`).join('\n')
+        : '';
+
+    const SYSTEM_PROMPT = `You are a compassionate social services navigator helping find FREE community resources in the US.
+
+Your response MUST be in this exact JSON format:
+{
+  "answer": "Your warm, practical response with specific resources, phone numbers, addresses. Use \n for line breaks. Lead with 988/211/911 if crisis detected.",
+  "new_resources": [
+    {
+      "name": "Program Name",
+      "phone": "555-555-5555",
+      "address": "123 Main St, City ST 12345",
+      "description": "What they offer and who they serve",
+      "hours": "M-F 9am-5pm",
+      "website": "example.org",
+      "state": "Oregon",
+      "county": "Multnomah County",
+      "category": "Food & Groceries",
+      "req": ["Eligibility requirement 1"]
+    }
+  ]
+}
+
+Valid categories: Food & Groceries, Meals, Shelter, Housing, Health Care, Mental Health & Recovery, Legal Services, Employment & Job Training, Benefits & Financial Aid, Clothing, Day Services/Hygiene, Domestic Violence & Sexual Assault, Youth Services, Veteran Services, Immigration, Reentry Resources, Transportation, Harm Reduction, Pet Care, Family & Parenting, Disability & Aging, Rental Assistance, STI & HIV Services, Libraries, Government Services, Safe Parking
+
+In new_resources include ONLY real verified programs NOT already in the local database. If no new programs, use [].
+Be warm, specific, mobile-friendly. Include phone numbers and addresses when known.`;
+
+    const USER_MSG = `Location: ${locCtx}\nQuestion: ${question}\n\nAlready in local database:\n${dbSummary}\n\nProvide your answer AND any real programs not listed above.${webSummary}`;
+
+    let aiAnswer = null;
+    let source = '';
+    let savedCount = 0;
+
+    if (process.env.DEEPSEEK_API_KEY) {
+        try {
+            const raw = await callDeepSeek(USER_MSG, SYSTEM_PROMPT);
+            const m = raw.match(/\{[\s\S]*\}/);
+            if (m) {
+                const p = JSON.parse(m[0]);
+                aiAnswer = p.answer;
+                if (Array.isArray(p.new_resources) && p.new_resources.length) savedCount = saveNewResources(p.new_resources);
+                source = 'deepseek';
+            } else {
+                aiAnswer = raw;
+                source = 'deepseek';
+            }
+        } catch(e) { log('WARN','DeepSeek fail',{message:e.message}); }
+    }
+
+    if (!aiAnswer && process.env.MOONSHOT_API_KEY) {
+        try {
+            const raw = await callMoonshot(USER_MSG, SYSTEM_PROMPT);
+            const m = raw.match(/\{[\s\S]*\}/);
+            if (m) {
+                const p = JSON.parse(m[0]);
+                aiAnswer = p.answer;
+                if (Array.isArray(p.new_resources) && p.new_resources.length) savedCount = saveNewResources(p.new_resources);
+                source = 'moonshot';
+            } else {
+                aiAnswer = raw;
+                source = 'moonshot';
+            }
+        } catch(e) { log('WARN','Moonshot fail',{message:e.message}); }
+    }
+
+    if (!aiAnswer && groqKey) {
+        try {
+            const raw = await callGroq(USER_MSG, SYSTEM_PROMPT);
+            const m = raw.match(/\{[\s\S]*\}/);
+            if (m) {
+                const p = JSON.parse(m[0]);
+                aiAnswer = p.answer;
+                if (Array.isArray(p.new_resources) && p.new_resources.length) savedCount = saveNewResources(p.new_resources);
+                source = 'groq';
+            } else {
+                aiAnswer = raw;
+                source = 'groq';
+            }
+        } catch(e) { log('WARN','Groq failed',{message:e.message}); }
+    }
+
+    if (!aiAnswer && anthropicKey) {
+        try {
+            const raw = await callAnthropic(USER_MSG, SYSTEM_PROMPT);
+            const m = raw.match(/\{[\s\S]*\}/);
+            if (m) {
+                const p = JSON.parse(m[0]);
+                aiAnswer = p.answer;
+                if (Array.isArray(p.new_resources) && p.new_resources.length) savedCount = saveNewResources(p.new_resources);
+                source = 'claude';
+            } else {
+                aiAnswer = raw;
+                source = 'claude';
+            }
+        } catch(e) { log('WARN','Anthropic failed',{message:e.message}); }
+    }
+
+    if (!aiAnswer) {
+        aiAnswer = localAnswer;
+        source = 'local';
+    }
+
+    res.json({ answer: aiAnswer, source, saved: savedCount });
+});
