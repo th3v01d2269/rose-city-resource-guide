@@ -260,7 +260,7 @@ async function searchWeb(query) {
 // ── API: AI Assistant ──────────────────────────────────────────────────
 app.post('/api/ask', async (req, res) => {
     const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || 'unknown';
-    if (rateLimit(ip, 30)) {
+    if (rateLimit(ip, 100)) {
         return res.status(429).json({ error: 'Too many requests. Please wait a moment.', source: 'local', saved: 0 });
     }
     const rawQ = req.body.question || '';
