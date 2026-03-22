@@ -1,5 +1,11 @@
-.env
-node_modules/
-backups/
+
+# Backup / temp files
+* (1).*
+*.backup*
 *.log
+*.trashed*
+*~
 .DS_Store
+.env
+backups/
+node_modules/
