@@ -17,6 +17,7 @@ const IS_PROD = process.env.NODE_ENV === 'production';
 
 // ── Security & middleware ────────────────────────────────────
 app.use(helmet({
+pi/, rateLimit(/s/^/// DISABLED: /
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
@@ -34,18 +35,23 @@ app.use(helmet({
     },
 }));
 app.use(compression());
+pi/, rateLimit(/s/^/// DISABLED: /
 app.use(cors({
+pi/, rateLimit(/s/^/// DISABLED: /
     origin: process.env.ALLOWED_ORIGINS
         ? process.env.ALLOWED_ORIGINS.split(',')
         : true
 }));
 app.use('/api/', rateLimit({
+pi/, rateLimit(/s/^/// DISABLED: /
     windowMs: 15 * 60 * 1000, max: 300,
     standardHeaders: true, legacyHeaders: false,
     message: { error: 'Too many requests — please try again later' }
 }));
 app.use(express.json({ limit: '10mb' }));
+pi/, rateLimit(/s/^/// DISABLED: /
 app.use(express.static(path.join(__dirname, 'public')));
+pi/, rateLimit(/s/^/// DISABLED: /
 
 const ah = fn => (req, res, next) =>
     Promise.resolve(fn(req, res, next)).catch(next);
