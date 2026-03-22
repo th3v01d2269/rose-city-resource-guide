@@ -407,3 +407,8 @@ Be warm, specific, mobile-friendly. Include phone numbers and addresses when kno
 
     res.json({ answer: aiAnswer, source, saved: savedCount });
 });
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`);
+});
