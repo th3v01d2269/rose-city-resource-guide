@@ -35,7 +35,7 @@ pi/, rateLimit(/s/^/// DISABLED: /
     },
 }));
 app.use(compression());
-pi/, rateLimit(/s/^/// DISABLED: /
+// Rate limit disabled for development
 app.use(cors({
 pi/, rateLimit(/s/^/// DISABLED: /
     origin: process.env.ALLOWED_ORIGINS
