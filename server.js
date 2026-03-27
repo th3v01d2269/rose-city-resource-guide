@@ -5,7 +5,7 @@ require('dotenv').config();
 const express     = require('express');
 const path        = require('path');
 const helmet      = require('helmet');
-const rateLimit   = require('express-rate-limit');
+//const rateLimit   = require('express-rate-limit');
 const cors        = require('cors');
 const compression = require('compression');
 const validator   = require('validator');
@@ -17,7 +17,6 @@ const IS_PROD = process.env.NODE_ENV === 'production';
 
 // ── Security & middleware ────────────────────────────────────
 app.use(helmet({
-pi/, rateLimit(/s/^/// DISABLED: /
     contentSecurityPolicy: {
         directives: {
             defaultSrc: ["'self'"],
@@ -267,8 +266,6 @@ async function searchWeb(query) {
 // ── API: AI Assistant ──────────────────────────────────────────────────
 app.post('/api/ask', async (req, res) => {
     const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || req.ip || 'unknown';
-    if (rateLimit(ip, 100)) {
-        return res.status(429).json({ error: 'Too many requests. Please wait a moment.', source: 'local', saved: 0 });
     }
     const rawQ = req.body.question || '';
     const state = String(req.body.state || '').trim().substring(0, 50);
